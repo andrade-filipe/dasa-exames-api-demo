@@ -1,0 +1,61 @@
+# badges-draft.yaml — proposed badges for dotnet-xunit-testing
+# Generator-proposed only. A separate sign-off promotes draft -> authoritative badges.yaml.
+# DO NOT rename to badges.yaml — that is outside this write boundary.
+
+skill_name: dotnet-xunit-testing
+drafted_at: "2026-07-01"
+drafted_by: generator
+
+badges:
+  - badge: B1-constants-compliance
+    status: passing
+    cadence: on-emission
+    run_ref: runs/2026-07-01-on-emission-b1.yaml
+    notes: >
+      All structural checks pass. Frontmatter leads with name + description, then tier/task_class/
+      targets_scenarios. Description carries 4 match-friendly trigger phrases (>= 3 required). Body
+      has a "When this triggers" section, thin xUnit essentials (Fact/Theory, AAA, naming, fixtures,
+      Throws/ThrowsAsync, over-mocking, determinism), and a 6-row anti-patterns table. No hard-coded
+      framework version / DI / layout. Agnostic testing skills referenced by name, not duplicated.
+      No framework jargon or markdown links in the body. Constants: deterministic-outer-loop,
+      minimal-sufficient-context, typed-tool-contracts-with-feedback-loop honored.
+
+  - badge: B2-scenario-benchmark
+    status: blocked
+    cadence: on-demand
+    run_ref: null
+    notes: >
+      Blocked pending a scenario seed. No test-quality scenario exists. Proposed name
+      xunit-test-quality-delta is recorded in composition.yaml stage5_observation.
+
+  - badge: B3-pack-story
+    status: applicable-pending
+    cadence: architect-triggered
+    run_ref: null
+    notes: >
+      Intended as a member of the dasa-dev-toolbox pack. B3 is applicable but pending until the
+      pack is authored and references this member.
+
+draft_incomplete_fields:
+  - field: benchmark_configuration.targets_scenarios
+    reason: >
+      No matching scenario exists at emission time (EMISSION_GAP in composition.yaml). Proposed
+      scenario name: xunit-test-quality-delta.
+    resolution: >
+      Seed the scenario, then re-emit with targets_scenarios populated and trigger B2.
+
+notes_for_review:
+  - >
+    Provenance is adapted-from catalog agnostic testing skills (testing-as-design-feedback,
+    beck-tdd-pattern-family, fields-test-design-discipline, bernhardt-mockless-testing-via-functional-core):
+    no testing technique exists under framework/techniques/. A second EMISSION_GAP (proposed
+    test-as-design-feedback-technique) is recorded. Skill kept intentionally thin per the dispatch.
+
+architect_sign_off_checklist:
+  - "[ ] Decide whether to formalize a testing/test-design framework technique (EMISSION_GAP)"
+  - "[ ] Verify the skill stays thin and does not duplicate agnostic testing-skill content"
+  - "[ ] Confirm no hard-coded framework version / DI container / project layout in body"
+  - "[ ] Verify constants_compliance rationales (esp. determinism) are accurate"
+  - "[ ] Resolve targets_scenarios when scenario is seeded"
+  - "[ ] Confirm B3 once dasa-dev-toolbox pack references this member"
+  - "[ ] Promote badges-draft.yaml -> badges.yaml"

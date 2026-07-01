@@ -1,0 +1,6 @@
+run_id: 2026-05-22-adversarial-code-reviewer-initial-emission
+artifact_id: adversarial-code-reviewer
+operator: gemini-cli
+event: initial-emission
+b1_self_check: passing
+notes: "Initial emission of the Qualitative Gem skill."

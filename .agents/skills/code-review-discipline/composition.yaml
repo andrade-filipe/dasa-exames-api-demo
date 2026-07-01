@@ -1,0 +1,43 @@
+artifact_id: code-review-discipline
+artifact_kind: skill
+
+framework_classification:
+  tier: discipline
+  skill_contract: discipline-verifiable
+  task_class: mixed
+  concern_layer: engineering-discipline
+  effort_level: L1
+  emitted_by: gemini-cli
+  emitted_at: 2026-05-23
+  framework_commit: 6d31347
+  audience_note: "metadata for marketplace index + architect sign-off; not buyer-facing"
+
+source_provenance:
+  original_author: Gemini CLI
+  original_url: https://github.com/google-gemini/gemini-cli
+  license: MIT
+  license_verified_at: 2026-05-23
+  fact_sheet_ref: null
+  our_modifications: "L1 Adaptation: formalized from code-review-excellence"
+  attribution_string: "Gemini CLI, MIT license."
+
+benchmark_configuration:
+  targets_scenarios: []
+  benchmark_priority: tier-2
+  scenario_seeding_open_item: true
+
+constants_declared:
+  - minimal-sufficient-context
+  - observable-agent-traces
+  - essence-vs-accident-distinction
+  - compact-discipline-emission
+
+composition_graph:
+  depends_on: []
+  extends: null
+  composes_with: []
+  invokes: []
+  alternatives: []
+
+discovery:
+  keywords: [from-repo, code-review, review-code]

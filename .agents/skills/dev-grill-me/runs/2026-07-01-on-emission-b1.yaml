@@ -1,0 +1,76 @@
+# B1 Constants Compliance run log — immutable append-only. On-emission cadence.
+
+run_id: 2026-07-01-on-emission-b1
+artifact: catalog/projects/dasa/skills/dev-grill-me/
+cadence: on-emission
+timestamp: "2026-07-01T00:00:00Z"
+executor: generator
+
+checks:
+  # Frontmatter shape (Codex implicit-invocation contract: name + description lead)
+  - check: "frontmatter leads with name then description"
+    result: pass
+  - check: "tier: technique present"
+    result: pass
+  - check: "task_class: decision-coherent present"
+    result: pass
+  - check: "targets_scenarios: [] present (draft-incomplete)"
+    result: pass
+
+  # Description trigger density
+  - check: "description contains a Trigger phrases list with >= 3 entries"
+    result: pass
+    detail: "4 match-friendly trigger phrases incl. lazy-prompt directives and 'grill me'"
+
+  # Body structure
+  - check: "## When this triggers section present"
+    result: pass
+  - check: "one-question-at-a-time behavior documented with recommended-answer pairing"
+    result: pass
+  - check: "examples framed around a .NET/C# codebase"
+    result: pass
+    detail: "OrdersApi / OrderService.Cancel / xUnit examples"
+  - check: "## Anti-patterns section present with >= 3 rows"
+    result: pass
+    detail: "5 rows incl. Guess and go, Checklist dump, Question without a recommendation"
+  - check: "explore-codebase-instead-of-asking guidance present"
+    result: pass
+
+  # Copy-safety (deploys into .agents/skills/)
+  - check: "body contains no CLAUDE.md reference"
+    result: pass
+  - check: "body contains no ADR- / pyramid / operator / harness-emission jargon"
+    result: pass
+  - check: "body contains no framework-internal markdown links"
+    result: pass
+
+  # Constants
+  - check: "minimal-sufficient-context honored (raise input specificity before action)"
+    result: pass
+  - check: "human-approval-on-irreversible-actions honored (block edits until task agreed)"
+    result: pass
+  - check: "deterministic-outer-loop honored (sufficiency stop predicate)"
+    result: pass
+
+  # composition.yaml completeness
+  - check: "composition.yaml provenance / framework_classification / constants_compliance present"
+    result: pass
+  - check: "stage5_observation EMISSION_GAP(s) present (missing technique + missing scenario)"
+    result: pass
+  - check: "provenance records adapted-from-operator-skill (source_technique null)"
+    result: pass
+
+  # Write boundary
+  - check: "no file written outside catalog/projects/dasa/skills/dev-grill-me/"
+    result: pass
+  - check: "badges.yaml (without -draft) NOT created"
+    result: pass
+
+overall:
+  b1_verdict: passing
+  failures: 0
+  total_checks: 22
+  notes: >
+    All structural B1 checks pass. Two EMISSION_GAPs recorded: no socratic-elicitation technique
+    exists under framework/techniques/ (provenance adapted-from-operator-skill), and no elicitation
+    scenario exists (targets_scenarios draft-incomplete). Body is copy-safe for .agents/skills/.

@@ -1,0 +1,58 @@
+artifact_id: dasa-dev-toolbox
+artifact_kind: pack
+
+framework_classification:
+  tier: workflow
+  task_class: mixed
+  concern_layer: engineering-discipline
+  effort_level: L0
+  emitted_by: generator
+  emitted_at: "2026-07-01"
+  framework_commit: "main"
+
+source_provenance:
+  original_author: "Context Engineering Framework"
+  original_url: "framework/workflows/rpi-pipeline-pack.md"
+  license: MIT
+  attribution_string: "Copyright (c) 2026 Context Engineering Framework. MIT License."
+
+benchmark_configuration:
+  targets_scenarios: []            # no matching scenario for a DASA dev pipeline yet — B2 blocked
+  benchmark_priority: tier-2
+  scenario_seeding_open_item: true
+
+constants_declared:
+  - externalize-resumption-state
+  - human-approval-on-irreversible-actions
+  - deterministic-outer-loop
+  - prefer-stateless-reducer-shape
+  - minimal-sufficient-context
+  - preserve-failure-clear-redundancy
+
+composition_graph:
+  depends_on: []
+  extends: null
+  orchestration_substrate: filesystem
+  composes_with:
+    - plan-then-execute
+    - context-compaction
+  member_agents:
+    - researcher-agent
+    - planner-agent
+    - implementer-agent
+  member_skills:
+    # authored in-node (this project)
+    - dev-grill-me
+    - dev-self-improvement
+    - dotnet-xunit-testing
+    # reused cross-node (referenced by id)
+    - agnostic-code-quality
+    - code-review-discipline
+    - adversarial-code-reviewer
+    - context-hygiene
+    - verify-and-doc
+    - curated-gotchas-retrospective-loop
+  alternatives: []
+
+discovery:
+  keywords: [from-framework, dotnet, dev-workflow, rpi, codex]

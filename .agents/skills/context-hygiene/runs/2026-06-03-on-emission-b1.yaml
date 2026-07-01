@@ -1,0 +1,108 @@
+# B1 Constants Compliance run log — immutable append-only
+# Per ADR-0007 Pillar 7: on-emission cadence. Git-tracked; never overwritten.
+
+run_id: 2026-06-03-on-emission-b1
+artifact: generation/skills/context-hygiene/
+cadence: on-emission
+timestamp: "2026-06-03T00:00:00Z"
+executor: marketplace-generator-sonnet   # claude-sonnet-4-6 variant
+
+checks:
+  # SKILL.md frontmatter integrity
+  - check: "tier: technique present in SKILL.md frontmatter"
+    result: pass
+  - check: "task_class: decision-coherent present in SKILL.md frontmatter"
+    result: pass
+  - check: "targets_scenarios: [] present in SKILL.md frontmatter (draft-incomplete)"
+    result: pass
+  - check: "[needs-architect-review] annotation present in SKILL.md"
+    result: pass
+
+  # Description trigger phrase density (>= 3 required per ADR-0017 discipline-verifiable check B3)
+  - check: "SKILL.md description has >= 3 trigger phrases"
+    result: pass
+    detail: "5 trigger phrases found"
+
+  # Anti-patterns section completeness
+  - check: "## Anti-patterns section present"
+    result: pass
+  - check: "Anti-patterns section has >= 3 entries"
+    result: pass
+    detail: "5 anti-pattern rows: fill-the-window, dump-all-docs, skip-compaction-across-phases, upfront-bounded-without-relevance-filter, all-history"
+  - check: "fill-the-window anti-pattern explicitly named (required per dispatch GUARDRAILS)"
+    result: pass
+  - check: "dump-all-docs anti-pattern explicitly named (required per dispatch GUARDRAILS)"
+    result: pass
+
+  # Source citations
+  - check: "just-in-time-context-loading.md cited as primary source"
+    result: pass
+  - check: "context-compaction.md cited as composed technique"
+    result: pass
+  - check: "minimal-sufficient-context.md cited as primary constant"
+    result: pass
+  - check: "failure-traces declared in compaction whitelist in SKILL.md body"
+    result: pass
+
+  # composition.yaml 6-section completeness
+  - check: "composition.yaml provenance: section present"
+    result: pass
+  - check: "composition.yaml framework_classification: section present"
+    result: pass
+  - check: "composition.yaml benchmark_configuration: section present"
+    result: pass
+  - check: "composition.yaml constants_compliance: section present"
+    result: pass
+  - check: "composition.yaml marketplace_metadata: section present"
+    result: pass
+  - check: "composition.yaml stage5_observation: section present"
+    result: pass
+
+  # ADR-0017 skill_contract field
+  - check: "skill_contract: technique-evaluable declared in composition.yaml"
+    result: pass
+
+  # EMISSION_GAP protocol (per ADR-0013 Layer 4)
+  - check: "draft-incomplete annotation present in composition.yaml"
+    result: pass
+  - check: "kind: EMISSION_GAP declared in stage5_observation"
+    result: pass
+  - check: "proposed_name: context-pollution-accuracy-delta declared"
+    result: pass
+  - check: "candidate_refs declared (REF-0001, REF-0029, REF-0032)"
+    result: pass
+
+  # Discovery keywords controlled vocabulary
+  - check: "from-framework provenance keyword present"
+    result: pass
+  - check: "meta-tooling capability keyword present"
+    result: pass
+  - check: "productivity intent keyword present"
+    result: pass
+
+  # Constants compliance rationale quality
+  - check: "minimal-sufficient-context: substantively honored with rationale"
+    result: pass
+  - check: "typed-tool-contracts-with-feedback-loop: vacuously honored (zero-tool skill)"
+    result: pass
+  - check: "preserve-failure-clear-redundancy: substantively honored with failure-traces citation"
+    result: pass
+
+  # Write boundary integrity
+  - check: "No file written outside generation/skills/context-hygiene/"
+    result: pass
+  - check: "badges.yaml (without -draft) NOT created"
+    result: pass
+
+overall:
+  b1_verdict: passing
+  failures: 0
+  total_checks: 30
+  notes: >
+    All 30 B1 structural checks pass. The artifact is complete except for the
+    targets_scenarios field which is intentionally draft-incomplete pending a
+    context-pollution-accuracy-delta scenario seed by architect Stage-5 (per the
+    operator-pre-authorized EMISSION_GAP protocol in the dispatch envelope).
+    The zero-tool / vacuously-honored framing for typed-tool-contracts follows
+    the curated-gotchas-retrospective-loop precedent and the marketplace-generator
+    agent spec §B1 edge case documentation.

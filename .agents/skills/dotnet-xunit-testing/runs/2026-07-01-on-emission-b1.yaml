@@ -1,0 +1,79 @@
+# B1 Constants Compliance run log — immutable append-only. On-emission cadence.
+
+run_id: 2026-07-01-on-emission-b1
+artifact: catalog/projects/dasa/skills/dotnet-xunit-testing/
+cadence: on-emission
+timestamp: "2026-07-01T00:00:00Z"
+executor: generator
+
+checks:
+  # Frontmatter shape (Codex implicit-invocation contract: name + description lead)
+  - check: "frontmatter leads with name then description"
+    result: pass
+  - check: "tier: technique present"
+    result: pass
+  - check: "task_class: decision-coherent present"
+    result: pass
+  - check: "targets_scenarios: [] present (draft-incomplete)"
+    result: pass
+
+  # Description trigger density
+  - check: "description contains a Trigger phrases list with >= 3 entries"
+    result: pass
+    detail: "4 match-friendly trigger phrases (write xUnit tests, cover this, TDD this, ...)"
+
+  # Body structure
+  - check: "## When this triggers section present"
+    result: pass
+  - check: "xUnit essentials present (Fact/Theory+InlineData, AAA, naming, fixtures, Throws/ThrowsAsync, over-mocking, determinism)"
+    result: pass
+  - check: "## Anti-patterns section present with >= 3 rows"
+    result: pass
+    detail: "6 rows incl. Nondeterministic test, Over-mocking, Multiple behaviors per test"
+  - check: "kept thin — agnostic testing skills referenced by name, not duplicated"
+    result: pass
+    detail: "testing-as-design-feedback, beck-tdd-pattern-family, fields-test-design-discipline, bernhardt-mockless-testing-via-functional-core"
+  - check: "no hard-coded framework version / DI container / project layout"
+    result: pass
+  - check: "determinism emphasized for health/diagnostics correctness"
+    result: pass
+
+  # Copy-safety (deploys into .agents/skills/)
+  - check: "body contains no CLAUDE.md reference"
+    result: pass
+  - check: "body contains no ADR- / pyramid / operator / harness-emission jargon"
+    result: pass
+  - check: "body contains no framework-internal markdown links"
+    result: pass
+
+  # Constants
+  - check: "deterministic-outer-loop honored (deterministic tests: no clock/random/network)"
+    result: pass
+  - check: "minimal-sufficient-context honored (thin skill, composes by name)"
+    result: pass
+  - check: "typed-tool-contracts-with-feedback-loop honored (assert on typed contract, not wording)"
+    result: pass
+
+  # composition.yaml completeness
+  - check: "composition.yaml provenance / framework_classification / constants_compliance present"
+    result: pass
+  - check: "stage5_observation EMISSION_GAP(s) present (missing testing technique + missing scenario)"
+    result: pass
+  - check: "provenance records adapted-from catalog agnostic testing skills (source_technique null)"
+    result: pass
+
+  # Write boundary
+  - check: "no file written outside catalog/projects/dasa/skills/dotnet-xunit-testing/"
+    result: pass
+  - check: "badges.yaml (without -draft) NOT created"
+    result: pass
+
+overall:
+  b1_verdict: passing
+  failures: 0
+  total_checks: 23
+  notes: >
+    All structural B1 checks pass. Two EMISSION_GAPs recorded: no testing technique exists under
+    framework/techniques/ (provenance adapted-from catalog agnostic testing skills), and no
+    test-quality scenario exists (targets_scenarios draft-incomplete). Body is copy-safe for
+    .agents/skills/ and kept intentionally thin.

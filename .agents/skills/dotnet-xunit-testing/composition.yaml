@@ -1,0 +1,101 @@
+# composition.yaml — framework-classification metadata for dotnet-xunit-testing
+# The developer-facing SKILL.md carries the lean frontmatter; this file carries the rest.
+
+skill_name: dotnet-xunit-testing
+emitted_at: "2026-07-01"
+emitted_by: generator
+node: catalog/projects/dasa
+
+provenance:
+  source_technique: null   # no testing technique exists under framework/techniques/ at emission time
+  adapted_from: catalog-agnostic-testing-skills
+  technique_tier: technique
+  notes: >
+    No testing technique exists under framework/techniques/ to ground this skill. The stack-agnostic
+    test-design judgment is carried by existing catalog skills under
+    catalog/areas/development/testing/skills/ — testing-as-design-feedback, beck-tdd-pattern-family,
+    fields-test-design-discipline, and bernhardt-mockless-testing-via-functional-core. This skill is
+    the thin .NET/xUnit expression layer over those; it composes with them by name and does not
+    duplicate their content. The missing framework technique is recorded as an EMISSION_GAP below.
+  composes_with_catalog_skills:
+    - catalog/areas/development/testing/skills/testing-as-design-feedback
+    - catalog/areas/development/testing/skills/beck-tdd-pattern-family
+    - catalog/areas/development/testing/skills/fields-test-design-discipline
+    - catalog/areas/development/testing/skills/bernhardt-mockless-testing-via-functional-core
+  source_refs_read:
+    - framework/constants/minimal-sufficient-context.md
+    - framework/constants/deterministic-outer-loop.md
+    - framework/constants/prefer-stateless-reducer-shape.md
+    - framework/constants/typed-tool-contracts-with-feedback-loop.md
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # writing a coherent test suite for a unit under test is a
+                                  # per-unit coherence task, not a parallel fan-out
+  skill_contract: technique-evaluable
+  effort_level: low
+  concern_layer: verification
+  # [needs-architect-review] Two open items: (1) targets_scenarios empty — no xUnit/test-writing
+  # scenario exists; (2) source_technique null — no testing technique exists under
+  # framework/techniques/, so provenance is adapted-from catalog agnostic testing skills. Both in
+  # stage5_observation. Marked draft-incomplete on targets_scenarios only.
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending a test-generation / test-quality scenario seed
+
+constants_compliance:
+  - constant: deterministic-outer-loop
+    rationale: >
+      Determinism is the skill's load-bearing claim: no wall-clock, no unseeded random, no live
+      network/DB in a unit test. This is the test-artifact analog of a deterministic loop — a test's
+      verdict must be a function of the code, not of when or where it ran. The "Nondeterministic
+      test" anti-pattern names the failure directly, tied to the health/diagnostics correctness need.
+    b1_verdict: passing
+  - constant: minimal-sufficient-context
+    rationale: >
+      The skill is deliberately thin: it supplies only xUnit mechanics and defers test-design
+      judgment to the named agnostic testing skills rather than duplicating them. Staying thin and
+      composing-by-name keeps the deployed context minimal-sufficient and avoids the bloat of a
+      restated testing tome. It also refuses to bake in framework-version / DI / layout assumptions,
+      reading them from the codebase instead.
+    b1_verdict: passing
+  - constant: typed-tool-contracts-with-feedback-loop
+    rationale: >
+      Honored at the design level: the skill treats a test as the feedback loop on a unit's contract
+      — assert on the typed contract (exception type, awaited result), not on incidental wording;
+      "test your logic and its contracts, trust the framework's" makes the contract boundary explicit.
+      This is a prompt-scaffold skill invoking zero tools, so the agent-tier structural assertion is
+      vacuously honored; substantively honored via the contract-testing guidance.
+    b1_verdict: passing
+  secondary_constants:
+    - prefer-stateless-reducer-shape   # mockless/functional-core guidance favors pure-function units with externalized state — directly testable
+
+marketplace_metadata:
+  audience: developer
+  discovery:
+    keywords:
+      - testing        # capability: unit testing in xUnit
+      - productivity   # intent: faster, more trustworthy test-writing
+      - from-framework # composes with catalog agnostic testing skills grounded in the framework
+
+# EMISSION_GAP(s) — surfaced per the emission-gap protocol
+stage5_observation:
+  - kind: EMISSION_GAP
+    artifact: catalog/projects/dasa/skills/dotnet-xunit-testing/
+    missing_tier: technique
+    reason: >
+      No testing technique exists under framework/techniques/ to ground a test-writing skill. The
+      agnostic test-design judgment currently lives only as catalog skills under
+      catalog/areas/development/testing/skills/, not as a formalized framework technique.
+      source_technique is null; provenance is adapted-from those catalog skills. A formalized
+      testing/test-design technique would let provenance point at a framework/ source.
+    proposed_name: test-as-design-feedback-technique
+  - kind: EMISSION_GAP
+    artifact: catalog/projects/dasa/skills/dotnet-xunit-testing/
+    missing_tier: scenario
+    reason: >
+      No scenario exists to discriminate test-generation quality (e.g. determinism, one-behavior-
+      per-test, appropriate mocking) for a .NET/xUnit skill. targets_scenarios stays [] and B2
+      cannot proceed until seeded.
+    proposed_name: xunit-test-quality-delta
+    draft_incomplete_field: benchmark_configuration.targets_scenarios

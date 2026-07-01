@@ -1,0 +1,61 @@
+# badges-draft.yaml — proposed badges for verify-and-doc
+# per ADR-0007 Pillar 6 (3-badge stack) + marketplace-generator agent spec §"Anti-boundary"
+# THIS FILE IS A PROPOSAL. Authoritative badges.yaml is architect-only (Stage-5 sign-off).
+# Do NOT rename to badges.yaml — that is the architect's Stage-5 sign-off action.
+
+artifact: generation/skills/verify-and-doc/
+skill_name: verify-and-doc
+draft_emitted_at: "2026-06-03"
+draft_emitted_by: marketplace-generator-sonnet
+
+badges:
+
+  B1:
+    name: constants-compliance
+    status: passing
+    cadence: on-emission
+    run_log: runs/2026-06-03-b1-emission.yaml
+    summary: >
+      All framework constants honored. typed-tool-contracts-with-feedback-loop: substantive
+      (git-diff feedback loop; tool failures surface as typed errors and halt the run).
+      observable-agent-traces: substantive (git diff is the implement cycle's trace; structured
+      report is the Skill's observability output). minimal-sufficient-context: substantive
+      (Pass 3 updates only what the diff requires; Pass 5 graduate-or-prune keeps the doc layer lean).
+      Frontmatter shape valid. Anti-patterns ≥3. Description triggers ≥3. Source technique cited.
+      Write boundary clean. Overall: passing.
+    draft_incomplete_fields:
+      - benchmark_configuration.targets_scenarios
+    draft_incomplete_note: >
+      targets_scenarios: [] is the only draft-incomplete field. All other B1 checks pass.
+      The artifact is fully emitted and actionable; only B2 (scenario-based evaluation) is
+      blocked pending architect Stage-5 scenario seed.
+
+  B2:
+    name: scenario-evaluation
+    status: blocked
+    cadence: on-demand   # operator-triggered via /benchmark-this-artifact after scenario is seeded
+    blocking_reason: >
+      No documentation-sync-loop scenario exists in framework/scenarios/ at emission time.
+      B2 cadence MUST NOT be triggered until architect Stage-5 seeds the scenario.
+      See stage5_observation in composition.yaml for proposed scenario shape and candidate REFs.
+    unblock_condition: >
+      Architect seeds framework/scenarios/documentation-sync-loop/ (or equivalent), runs ABC audit,
+      then operator triggers /benchmark-this-artifact generation/skills/verify-and-doc/
+
+  B3:
+    name: pack-story-evaluation
+    status: not-yet-applicable
+    cadence: architect-triggered
+    note: >
+      B3 (pack-story evaluation) becomes applicable when this Skill is composed into a Workflow
+      Pack that includes it as a member Skill. Current state: standalone Skill, no host Pack.
+      Architect may trigger B3 if this Skill is incorporated into an RPI-V workflow Pack or a
+      harness-improvement Pack in a future emission.
+
+# Stage-5 signal for architect
+stage5_signal:
+  action_needed: seed-scenario
+  proposed_scenario: documentation-sync-loop
+  candidate_refs: [REF-0193, REF-0022]
+  priority: P1   # enables B2 for this Skill and potentially for any future RPI-V pack members
+  proposed_shape_location: composition.yaml#stage5_observation.proposed_scenario_shape

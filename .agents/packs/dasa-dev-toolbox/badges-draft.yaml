@@ -1,0 +1,70 @@
+# badges-draft.yaml — dasa-dev-toolbox
+#
+# PROPOSAL-ONLY. The architect signs off separately and promotes this to badges.yaml.
+#
+# THIS FILE IS THE CANONICAL HOME for "Constants honored" rationale.
+# manifest.md body does NOT duplicate this content. composition.yaml carries
+# only the string-ID index (constants_declared); rationale lives here.
+
+b1_constants_compliance:
+  status: passing
+  constants_checked:
+    externalize-resumption-state:
+      verdict: passing
+      rationale: >
+        Substantive. State lives in the filesystem handoff files RESEARCH.md and PLAN.md, not in
+        the chat. Every agent body makes this explicit and each phase resumes by loading the prior
+        phase's file after a reset — resumption state is externalized by construction.
+    human-approval-on-irreversible-actions:
+      verdict: passing
+      rationale: >
+        Substantive. PLAN.md is a human approval checkpoint before any code changes; the
+        implementer is told not to commit unless explicitly instructed; and dev-self-improvement
+        proposals to AGENTS.md require human approval before they are written.
+    deterministic-outer-loop:
+      verdict: passing
+      rationale: >
+        Substantive. Each agent has a concrete, artifact-based stop predicate (RESEARCH.md
+        complete and cited; PLAN.md complete; plan steps done AND tests pass) — no "until you feel
+        done" language. The Research -> Plan -> Implement order is a fixed, deterministic loop.
+    prefer-stateless-reducer-shape:
+      verdict: passing
+      rationale: >
+        Substantive. Each phase is a stateless reducer over its input file: it reads one handoff
+        file and emits the next, holding no state across the reset. The planner also steers the
+        design toward small units with externalized state so the result stays testable.
+    minimal-sufficient-context:
+      verdict: passing
+      rationale: >
+        Substantive. The mandatory context reset between phases plus the context-hygiene skill in
+        Research keep each session loaded with only what the current phase needs, clearing
+        prior-phase noise before the next phase starts.
+    preserve-failure-clear-redundancy:
+      verdict: passing
+      rationale: >
+        Substantive. The implementer is told to STOP and report if the plan is flawed rather than
+        improvise or patch around a broken approach, preserving a clear failure instead of a
+        confused redundant fix.
+
+b2_scenario_evaluation:
+  status: blocked
+  reason: >
+    No scenario under framework/scenarios/ matches a DASA .NET dev pipeline. benchmark_configuration
+    .targets_scenarios is empty; B2 cannot run until a scenario is seeded (recorded as an open item).
+
+b3_pack_story:
+  status: applicable
+  narrative: >
+    The pack tells a coherent end-to-end story: a possibly-vague task is sharpened (dev-grill-me),
+    researched into RESEARCH.md with lean context (context-hygiene), planned into a testable PLAN.md
+    at a human checkpoint, and implemented with xUnit tests, doc sync, and quality self-checks — with
+    an optional hostile pre-merge review and an after-task retro that grows AGENTS.md. Members
+    compose without overlap: three phase agents plus nine skills, each with a distinct attach point.
+
+architect_sign_off_checklist:
+  - [ ] Confirm all 9 member_skills resolve to real catalog/**/skills/<id>/ dirs
+  - [ ] Confirm the 3 member agents each have a concrete stop predicate (no "until satisfied")
+  - [ ] Confirm no framework-operator jargon leaked into dev-facing prose
+  - [ ] Confirm AGENTS.md (not CLAUDE.md) is named as durable team memory
+  - [ ] Seed or waive a B2 scenario for a .NET dev pipeline
+  - [ ] Promote this draft to badges.yaml

@@ -1,0 +1,134 @@
+# B1 Constants Compliance run log — on-emission cadence
+# per ADR-0007 Pillar 7 + marketplace-generator agent spec §"B1 Constants Compliance self-check"
+# This file is append-only. Immutable after write. Cleanup via deprecation flag, never deletion.
+
+run_id: 2026-06-03-b1-emission
+cadence: on-emission
+artifact: generation/skills/verify-and-doc/
+emitted_by: marketplace-generator-sonnet
+run_at: "2026-06-03"
+sha_at_run: HEAD   # to be replaced by git commit SHA at sign-off
+
+checks:
+
+  # Check 1 — Frontmatter shape (tier, task_class, targets_scenarios present and well-formed)
+  - id: frontmatter-shape
+    description: "SKILL.md frontmatter declares tier, task_class, targets_scenarios; composition.yaml declares skill_contract and framework_classification."
+    result: passing
+    notes: >
+      SKILL.md: tier=technique, task_class=decision-coherent, targets_scenarios=[] (draft-incomplete
+      with [needs-architect-review] comment). composition.yaml: skill_contract=technique-evaluable,
+      tier=technique, task_class=decision-coherent. All required fields present and well-formed.
+      targets_scenarios=[] with EMISSION_GAP stage5_observation is the operator-pre-authorized
+      draft-incomplete pattern (mirrors curated-gotchas-retrospective-loop precedent exactly).
+
+  # Check 2 — Scenario validation (targets_scenarios entries resolve under framework/scenarios/)
+  - id: scenario-validation
+    description: "Every entry in targets_scenarios corresponds to a real framework/scenarios/<id>/scenario.md."
+    result: passing-vacuous
+    notes: >
+      targets_scenarios is []. Zero entries to validate. Validation is vacuously satisfied.
+      EMISSION_GAP stage5_observation documents the missing scenario (proposed_name:
+      documentation-sync-loop) with candidate_refs: [REF-0193, REF-0022] and proposed scenario
+      shape. Artifact is draft-incomplete on this field only.
+
+  # Check 3 — typed-tool-contracts-with-feedback-loop (SUBSTANTIVE — this Skill is tool-using)
+  - id: typed-tool-contracts-with-feedback-loop
+    description: "Skill declares typed tool contracts with explicit feedback path; git-diff loop is the primary feedback mechanism."
+    result: passing
+    notes: >
+      The Skill is substantively tool-using: git diff (Bash), Read, Grep, Edit, Write are
+      all declared in the SKILL.md "## Tool contract" section with schema (function-calling-signature
+      via Claude Code tool API), explicit result_feedback_path (diff-text-to-accuracy-verdict-loop),
+      and failure_signal_handling (surface-as-typed-error, halt-and-report). Every documentation
+      decision is grounded in typed diff output re-entering the verification reasoning step.
+      The fire-and-forget-tool-call and silent-tool-failure anti-patterns are explicitly excluded
+      by the hard rules section. composition.yaml constants_compliance entry for this constant
+      is substantive (not vacuous). Passes B1.
+      NOTE: This is NOT the vacuous "zero-tool" edge case — the Skill explicitly invokes tools
+      and the feedback loop is load-bearing.
+
+  # Check 4 — observable-agent-traces
+  - id: observable-agent-traces
+    description: "Skill acknowledges the git diff as the implement cycle's observable trace; structured run report is the Skill's own observability output."
+    result: passing
+    notes: >
+      SKILL.md "## Composition notes" section documents: "the git diff is the implement cycle's
+      observable trace for this Skill. The Skill's capture phase reads the diff; without a
+      reviewable diff there is nothing to verify against." The constant's agent-tier structural
+      slots bind on host Agents; this Skill's own observability output is the structured run
+      report. composition.yaml rationale is complete. Passes B1.
+
+  # Check 5 — minimal-sufficient-context
+  - id: minimal-sufficient-context
+    description: "Skill enforces minimal-sufficient context discipline: update only what the diff requires; Pass 5 keeps doc layer lean."
+    result: passing
+    notes: >
+      SKILL.md Pass 3 discipline: "update only what the diff requires. Do not rewrite unrelated
+      sections." Hard rules section: "update only what the diff requires." Anti-patterns table
+      includes "doc-for-every-line-change" (inflating doc tree with low-signal entries) and
+      "pre-emptive-doc-update." Pass 5 (graduate-or-prune) is the structural mechanism that
+      keeps the doc layer lean over time. The constant's subtractive discipline is the Skill's
+      operational claim. Passes B1.
+
+  # Check 6 — Technique slots declared and well-formed
+  - id: technique-slots
+    description: "SKILL.md frontmatter declares all four operator-parameterized slots with valid enum values."
+    result: passing
+    notes: >
+      doc_root: template with operator-supplied hint (string path, required)
+      ownership_convention: template with operator-supplied hint (string with enum examples, required)
+      verify_trigger: post-implement (enum: post-implement | post-commit | on-demand)
+      graduate_prune_policy: graduate-to-durable-docs (enum: graduate-to-durable-docs | prune-on-staleness | keep-hot)
+      All four slots present and well-formed. Matches the technique pattern's slot structure.
+
+  # Check 7 — Anti-patterns section (≥3 rows required per dispatch VERIFICATION)
+  - id: anti-patterns-section
+    description: "SKILL.md ## Anti-patterns section has ≥3 rows."
+    result: passing
+    notes: >
+      Five anti-patterns declared in table format:
+      1. write-only-doc-update (updating docs without verifying against code diff)
+      2. implement-without-verify (merging code changes without V phase)
+      3. doc-for-every-line-change (inflating doc tree with low-signal entries)
+      4. pre-emptive-doc-update (updating before implementation, not re-verifying after)
+      5. over-broad-graduation (premature graduation without stability evidence)
+      Meets the ≥3 row requirement. Anti-pattern "write-only-doc-update" is the specific one
+      cited in the dispatch VERIFICATION contract.
+
+  # Check 8 — description engineered for post-implement auto-trigger (≥3 triggers)
+  - id: description-trigger-density
+    description: "SKILL.md description field contains ≥3 dense trigger phrases for post-implement auto-surface."
+    result: passing
+    notes: >
+      The description field includes:
+      1. "after an implement cycle: reads git diff" — direct post-implement trigger
+      2. "git diff shows files changed but no corresponding doc update landed" — drift-detection trigger
+      3. "developer is finishing an RPI cycle and needs the V (Verify) phase" — workflow-close trigger
+      4. "new module, integration, or behavioral area appears in the diff" — new-area trigger
+      5. "`last-verified` dates in existing doc slices are older than the code" — staleness trigger
+      Exceeds ≥3 requirement. Triggers are specific and actionable (not generic).
+
+  # Check 9 — SKILL.md cites source technique
+  - id: source-technique-citation
+    description: "SKILL.md cites framework/techniques/curated-gotchas-retrospective-loop.md as source technique."
+    result: passing
+    notes: >
+      Cross-references section includes: "Framework source: framework/techniques/
+      curated-gotchas-retrospective-loop.md — the source Technique pattern this Skill realizes
+      in the documentation-sync domain." Additionally, source_refs in SKILL.md frontmatter
+      cites REF-0193, REF-0022, REF-0020, REF-0002 with full citation notes.
+
+  # Check 10 — Write boundary
+  - id: write-boundary
+    description: "All writes confined to generation/skills/verify-and-doc/ only."
+    result: passing
+    notes: >
+      Files written: SKILL.md, composition.yaml, badges-draft.yaml, runs/2026-06-03-b1-emission.yaml
+      — all under generation/skills/verify-and-doc/. No writes to framework/, docs/, knowledge/,
+      .claude/, or any path outside generation/. badges.yaml (authoritative) was NOT created.
+
+overall_b1_result: passing
+draft_incomplete_fields:
+  - benchmark_configuration.targets_scenarios   # targets_scenarios: [] pending documentation-sync-loop scenario seed
+b1_gate_to_b2: blocked   # B2 blocked until architect seeds documentation-sync-loop scenario (see stage5_observation)

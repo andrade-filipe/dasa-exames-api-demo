@@ -1,0 +1,135 @@
+# composition.yaml — framework-classification metadata for curated-gotchas-retrospective-loop
+# Per ADR-0010 (marketplace artifact audience matrix) and ADR-0017 (skill_contract field)
+# Buyer-facing SKILL.md carries the lean 5-field frontmatter; this file carries the rest.
+
+skill_name: curated-gotchas-retrospective-loop
+emitted_at: "2026-06-02"
+emitted_by: marketplace-generator-sonnet   # claude-sonnet-4-6 variant
+
+provenance:
+  source_technique: framework/techniques/curated-gotchas-retrospective-loop.md
+  technique_tier: technique
+  anchor_ref: REF-0193
+  corroborating_refs:
+    - REF-0020
+    - REF-0002
+    - REF-0044
+  derived_from: research/concepts/harness-engineering-workflows.md#meta-harness-outer-loop
+  source_refs_read:
+    - research/articles/catalog/fact-sheets/REF-0193_2026-harness-engineering-nisi-deleting-agent-skills-gotchas.md
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # per ADR-0006: retrospective is a synchronization point (not parallel research fan-out)
+  skill_contract: technique-evaluable   # per ADR-0017: source pattern lives under framework/techniques/
+  # [needs-architect-review] targets_scenarios is empty because no harness-improvement-loop scenario
+  # exists in framework/scenarios/ at emission time. This combination (technique-evaluable + empty
+  # targets_scenarios) is a known EMISSION_GAP per ADR-0013 §"Layer 4". The artifact is marked
+  # draft-incomplete on this field only. See stage5_observation below.
+  # Do NOT emit B2 cadence until a harness-gotchas scenario is seeded by architect Stage-5.
+  effort_level: medium
+  concern_layer: harness
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending harness-improvement-loop scenario seed
+  # When scenario is seeded by architect, update this field and remove draft-incomplete status.
+  # Expected scenario shape: decision-coherent, technique-tier, measuring harness-accuracy-before-vs-after
+  # on a curated vs bloated gotchas surface. See stage5_observation.
+
+constants_compliance:
+  # Primary constants — all three apply_to ".claude/agents/*.md" per their verification assertions.
+  # This Skill is NOT an Agent and invokes ZERO tools, so the Agent-tier structural constraints
+  # (token_budget_per_step, trace_substrate, active_tool_ceiling) do not bind.
+  # Compliance rationale follows the zero-tool / zero-agent edge case per agent spec §B1.
+  - constant: minimal-sufficient-context
+    evidence_refs: [REF-0193, REF-0001, REF-0034, REF-0036, REF-0033, REF-0017, REF-0019]
+    rationale: >
+      The Skill's ENTIRE operational claim IS the minimal-sufficient-context discipline applied to
+      cross-session harness improvement: the 553-line curated list that replaced 10,000 lines of
+      auto-generated documentation and raised accuracy from 77% to 97% (REF-0193) is the strongest
+      single field measurement that minimum-sufficient context beats maximum-coverage context.
+      The Skill structurally enforces this via the entry_budget slot (finite ceiling), the
+      graduate_or_prune_policy slot (what removes entries), and the anti-pattern unbounded-gotchas-growth
+      (what fails the constant). The constant's agent-tier structural slots (select_strategy,
+      token_budget_per_step, budget_overflow_action) bind on host Agents that DEPLOY this Skill,
+      not on the Skill artifact itself. Vacuously honored at the Skill level; substantively honored
+      at the design level — the Skill operationalizes the constant's core claim.
+    b1_verdict: passing
+
+  - constant: observable-agent-traces
+    evidence_refs: [REF-0193, REF-0028, REF-0033, REF-0029, REF-0022, REF-0020, REF-0002]
+    rationale: >
+      The Skill's capture phase reads the completed run's execution trace to distill a recurring
+      mistake into a gotchas entry. Without replayable, structured traces there is nothing to
+      retrospect on — the CASE loop's Collect stage presupposes the trace substrate this Constant
+      requires. The Skill body documents this dependency explicitly in the "Phase 1 — Capture"
+      section and in the CASE cycle reference. The constant's agent-tier structural slots
+      (trace_substrate, trace_event_schema, replay_protocol) bind on host Agents, not on this Skill.
+      Substantively honored: the Skill's design depends on observable traces existing.
+      Vacuously honored: the Skill invokes zero tools and has no agent-tier trace slots of its own.
+    b1_verdict: passing
+
+  - constant: bounded-tool-surface
+    evidence_refs: [REF-0193, REF-0001, REF-0029, REF-0033, REF-0035, REF-0036, REF-0038]
+    rationale: >
+      vacuously honored — the constant binds on tool-using Agents; this Skill invokes zero tools.
+      REF-0193's saturation finding (95%-skill-deletion corroborates: a sprawling capability surface
+      degrades accuracy) is the quantified witness that MOTIVATES this Skill, and the Skill
+      acknowledges this in its cross-references. The Skill's design is an expression of the constant's
+      core claim applied to the skill/doc surface specifically.
+    b1_verdict: passing
+
+  secondary_constants:
+    # Secondary constants are also structurally honored via zero-tool / zero-agent vacuous path.
+    # Each is substantively honored by the Skill's design; documented for architect sign-off.
+    - context-curation-discipline   # consume_strategy is Select-pillar curation over the gotchas list
+    - preserve-failure-clear-redundancy   # loop preserves distilled failures while clearing redundant bulk
+    - externalize-resumption-state   # gotchas file is externalized cross-session state the next run reads cold
+
+marketplace_metadata:
+  category: harness-improvement-loop
+  composing_techniques:
+    - reflexion   # within-task sibling; a system may run reflexion inside a task AND this loop across tasks
+    - just-in-time-context-loading   # retrieve-relevant-entries-by-task consume strategy IS JIT loading
+    - context-compaction   # retrospective distills many raw failures into one lean entry (cross-session compaction)
+  audience: operator   # harness operators and agent maintainers who own the recurring agent system
+
+# EMISSION_GAP stage5_observation — surfaced per ADR-0013 §"Layer 4"
+stage5_observation:
+  kind: EMISSION_GAP
+  artifact: generation/skills/curated-gotchas-retrospective-loop/
+  missing_tier: technique   # specifically: a scenario that discriminates technique-tier harness-improvement-loop artifacts
+  area: null   # universal framework gap — not domain-keyed
+  proposed_name: harness-gotchas-accuracy-delta
+  candidate_refs:
+    - REF-0193   # the before/after measurement (77%→97%) IS the scenario shape
+    - REF-0020   # automated sibling; defines the comparison baseline (automated vs human-in-the-loop loop)
+    - REF-0044   # concentrated-skill-leverage (independent corroboration of same finding)
+  proposed_scenario_shape: |
+    scenario_id: harness-gotchas-accuracy-delta
+    task_class: decision-coherent
+    tier: technique
+    description: >
+      Measures a recurring-agent-system's task success rate when operating with (a) a curated gotchas
+      list vs (b) a bloated auto-generated skill/documentation surface. Discriminates the
+      curated-gotchas-retrospective-loop Technique against a no-curation baseline.
+    measurable_dimensions: [accuracy, cost-tokens]
+    baselines:
+      floor:
+        kind: zero-shot
+        description: "Agent operates with a large auto-generated skill/documentation surface (the REF-0193 pre-deletion state). No curation, no budget, no graduate-or-prune cycle."
+      reference:
+        kind: named-technique
+        technique_ref: framework/techniques/curated-gotchas-retrospective-loop.md
+        description: "Agent operates with a lean, human-curated gotchas list under entry_budget."
+  note: >
+    The REF-0193 before/after measurement (77%→97%, 10k→553 lines) is the natural scenario shape.
+    This is a load-bearing gap: without the scenario, skill_contract: technique-evaluable cannot
+    be satisfied per ADR-0017 and B2 cadence cannot proceed. The artifact is draft-incomplete on
+    the targets_scenarios field only — all other components are complete and B1 passes.
+  draft_incomplete_field: benchmark_configuration.targets_scenarios
+  resolution_path: >
+    Architect Stage-5 seeds framework/scenarios/harness-gotchas-accuracy-delta/ using the proposed
+    shape above, runs ABC audit, then signals the marketplace-generator to re-emit with the scenario
+    declared. Alternatively, if a different existing scenario can be argued to discriminate this
+    Technique (unlikely given the harness-specific domain), that scenario is declared instead.

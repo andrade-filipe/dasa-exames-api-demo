@@ -1,0 +1,169 @@
+# composition.yaml — framework-classification metadata for verify-and-doc
+# Per ADR-0010 (marketplace artifact audience matrix) and ADR-0017 (skill_contract field)
+# Buyer-facing SKILL.md carries the lean 5-field frontmatter; this file carries the rest.
+
+skill_name: verify-and-doc
+emitted_at: "2026-06-03"
+emitted_by: marketplace-generator-sonnet   # claude-sonnet-4-6 variant
+
+provenance:
+  source_technique: framework/techniques/curated-gotchas-retrospective-loop.md
+  technique_tier: technique
+  technique_application: documentation-sync
+  anchor_ref: REF-0193
+  corroborating_refs:
+    - REF-0022
+    - REF-0020
+    - REF-0002
+  reference_implementation:
+    agent: knowledge/zoetis-skills/gerar-web/.claude/agents/verify-and-document.md
+    command: knowledge/zoetis-skills/gerar-web/.claude/commands/verify-and-doc.md
+    note: >
+      The gerar-web verify-and-document agent is the domain-specific original.
+      This Skill is a portable extraction: doc_root and ownership_convention replace
+      the hardcoded 'docs/llm/slices/' and 'owners-paths-frontmatter-globs' specifics,
+      making the loop project-agnostic.
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # per ADR-0006: verification is a synchronization point
+                                  # (compare code vs. doc, decide what to update, write update)
+                                  # — not a parallel research fan-out
+  skill_contract: technique-evaluable   # per ADR-0017: source pattern lives under framework/techniques/
+  # [needs-architect-review] targets_scenarios is empty because no documentation-sync-loop scenario
+  # exists in framework/scenarios/ at emission time. This combination (technique-evaluable + empty
+  # targets_scenarios) is a known EMISSION_GAP per ADR-0013 §"Layer 4". The artifact is marked
+  # draft-incomplete on this field only. See stage5_observation below.
+  # Do NOT emit B2 cadence until a documentation-sync-loop scenario is seeded by architect Stage-5.
+  effort_level: medium
+  concern_layer: harness
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending documentation-sync-loop scenario seed
+  # When scenario is seeded by architect, update this field and remove draft-incomplete status.
+  # Expected scenario shape: decision-coherent, technique-tier, measuring doc-accuracy-before-vs-after
+  # a verify-and-doc pass on a codebase with known drift. See stage5_observation.
+
+discovery:
+  keywords:
+    - from-framework        # provenance: technique-tier artifact from framework/techniques/
+    - documentation         # capability: updates, creates, verifies documentation
+    - write-docs            # intent: produces written documentation artifacts
+    - verify-docs           # intent: checks documentation accuracy against code
+    - rpi-loop              # intent: closes the Research-Plan-Implement-Verify cycle
+    - doc-drift             # intent: detects and repairs documentation drift
+  category: harness-improvement-loop
+
+constants_compliance:
+  # This Skill IS tool-using (git diff, file reads/writes on docs).
+  # typed-tool-contracts-with-feedback-loop is SUBSTANTIVE — not vacuous.
+  - constant: typed-tool-contracts-with-feedback-loop
+    evidence_refs: [REF-0193, REF-0022, REF-0021, REF-0037]
+    rationale: >
+      The Skill's core loop is a git-diff feedback loop: every documentation decision is grounded
+      in the diff output (typed tool result) re-entering the verification reasoning step. The tool
+      contract is described explicitly in the SKILL.md "## Tool contract" section:
+      - git diff (Bash) → newline-separated paths → feeds verification loop;
+        if empty, Skill exits cleanly ("no changes to verify").
+      - git diff per-path (Bash) → unified diff text → fed to comparison step for each matched slice.
+      - Read (source files + doc slices) → file content → compared to produce accuracy verdict.
+      - Edit / Write (doc slices) → write acknowledgement; failure surfaces as typed error and blocks run.
+      The feedback path is explicit: diff output → ownership resolution → accuracy verdict → edit/write.
+      Failure signal: git diff failure → typed report entry + halt (not silent continue). Edit failure →
+      typed report entry + halt. This is the surface-as-typed-error + halt-and-report strategy.
+      The constant binds substantively on this Skill because tool results are load-bearing on every
+      documentation decision made in the loop.
+    tool_schema_format: function-calling-signature   # Bash, Read, Edit, Write via Claude Code tool API
+    result_feedback_path: diff-text-to-accuracy-verdict-loop
+    failure_signal_handling: surface-as-typed-error
+    b1_verdict: passing
+
+  - constant: observable-agent-traces
+    evidence_refs: [REF-0193, REF-0022, REF-0020, REF-0028]
+    rationale: >
+      The git diff IS the implement cycle's observable trace from the perspective of this Skill.
+      The SKILL.md "## Composition notes" section documents this explicitly: "the git diff is the
+      implement cycle's observable trace for this Skill. The Skill's capture phase reads the diff;
+      without a reviewable diff there is nothing to verify against." The constant binds substantively:
+      without an observable trace (diff) the loop cannot begin. The constant's agent-tier structural
+      slots (trace_substrate, trace_event_schema, replay_protocol) bind on host Agents that DEPLOY
+      this Skill, not on the Skill artifact itself. The Skill's own observability output is the
+      structured report (Pass 3 findings + Pass 5 graduation decisions) — a structured run artifact
+      that the next session can read.
+    b1_verdict: passing
+
+  - constant: minimal-sufficient-context
+    evidence_refs: [REF-0193, REF-0022, REF-0020]
+    rationale: >
+      Pass 3 enforces minimal-sufficient context discipline at the documentation layer: update only
+      what the diff requires, do not rewrite unrelated sections. Pass 5 (graduate-or-prune) keeps
+      the doc layer lean over time, preventing the same documentation bloat that REF-0193's gotchas
+      loop reverses in the landmine domain. The SKILL.md hard rules section codifies this explicitly:
+      "update only what the diff requires." The anti-patterns table includes "doc-for-every-line-change"
+      (inflating the doc tree with low-signal entries). The Skill's operational claim is subtractive
+      in the same way the source Technique's claim is subtractive: accurate minimal docs outperform
+      comprehensive stale docs. The constant's agent-tier structural slots bind on host Agents, not
+      on the Skill; but the Skill substantively embodies the constant's core discipline at every pass.
+    b1_verdict: passing
+
+  secondary_constants:
+    - context-curation-discipline   # Pass 2 ownership resolution is Select-pillar curation over doc slices
+    - preserve-failure-clear-redundancy   # Pass 5 preserves stable invariants while clearing stale/redundant sections
+    - externalize-resumption-state   # verified doc slices are externalized cross-session state the next run reads cold
+
+marketplace_metadata:
+  category: harness-improvement-loop
+  composing_techniques:
+    - curated-gotchas-retrospective-loop   # the gotchas loop's graduate pass hands stable entries to this Skill's Pass 5
+    - just-in-time-context-loading   # Pass 2 ownership resolution is JIT loading over doc slices by ownership-convention grep
+    - context-compaction   # Pass 5 graduate-or-prune is a form of cross-session compaction over accumulated doc content
+  audience: operator   # developers and agent-deployers who own the RPI workflow and the doc_root
+
+# EMISSION_GAP stage5_observation — surfaced per ADR-0013 §"Layer 4"
+stage5_observation:
+  kind: EMISSION_GAP
+  artifact: generation/skills/verify-and-doc/
+  missing_tier: scenario   # specifically: a scenario that discriminates technique-tier documentation-sync-loop artifacts
+  area: null   # universal framework gap — not domain-keyed
+  proposed_name: documentation-sync-loop
+  candidate_refs:
+    - REF-0193   # CASE loop shape (capture→analyze→synthesize→enforce) IS the scenario shape
+    - REF-0022   # externalization framework — filesystem-as-experience-store substrate for doc artifacts
+  proposed_scenario_shape: |
+    scenario_id: documentation-sync-loop
+    task_class: decision-coherent
+    tier: technique
+    description: >
+      Measures documentation accuracy before vs. after a verify-and-doc pass on a codebase
+      with known drift (code changed; docs not updated). Discriminates the verify-and-doc
+      Technique against a no-verification baseline (implement without V phase) and against
+      a manual write-only update (update docs without reading the diff).
+    measurable_dimensions: [doc-accuracy, coverage, drift-detection-recall]
+    baselines:
+      floor:
+        kind: zero-shot
+        description: >
+          Developer implements code changes and updates docs from memory (no diff-grounded
+          verification). Docs may be plausible but contain inaccuracies reflecting intent
+          rather than implemented behavior.
+      reference:
+        kind: named-technique
+        technique_ref: framework/techniques/curated-gotchas-retrospective-loop.md
+        description: >
+          Verify-and-doc pass: git diff read, ownership resolved, each affected slice compared
+          against actual code, accurate sections preserved (last-verified bumped), inaccurate
+          sections rewritten, new areas documented. Accuracy measured against ground-truth
+          code behavior.
+  note: >
+    The CASE loop shape from REF-0193 (capture→analyze→synthesize→enforce applied to docs)
+    is the natural scenario shape. This is a load-bearing gap: without the scenario,
+    skill_contract: technique-evaluable cannot be satisfied per ADR-0017 and B2 cadence
+    cannot proceed. The artifact is draft-incomplete on the targets_scenarios field only —
+    all other components are complete and B1 passes.
+  draft_incomplete_field: benchmark_configuration.targets_scenarios
+  resolution_path: >
+    Architect Stage-5 seeds framework/scenarios/documentation-sync-loop/ using the proposed
+    shape above, runs ABC audit, then signals the marketplace-generator to re-emit with the
+    scenario declared. Alternatively, if a different existing scenario can be argued to
+    discriminate this Technique (unlikely given the doc-sync domain), that scenario is
+    declared instead.

@@ -1,0 +1,160 @@
+# composition.yaml — framework-classification metadata for context-hygiene
+# Per ADR-0010 (marketplace artifact audience matrix) and ADR-0017 (skill_contract field)
+# Buyer-facing SKILL.md carries the lean 5-field frontmatter; this file carries the rest.
+
+skill_name: context-hygiene
+emitted_at: "2026-06-03"
+emitted_by: marketplace-generator-sonnet   # claude-sonnet-4-6 variant
+
+provenance:
+  source_technique: framework/techniques/just-in-time-context-loading.md
+  composed_with_technique: framework/techniques/context-compaction.md
+  technique_tier: technique
+  anchor_refs:
+    - REF-0029   # LangChain context-engineering-for-agents — JIT loading, auto-compact
+    - REF-0032   # Manus lessons — failure-trace preservation
+  corroborating_refs:
+    - REF-0001   # Anthropic effective context engineering — curation-over-maximization, compaction-prompt-tuning
+    - REF-0019   # Lost in the Middle — reader saturation, U-shaped position curve
+  source_refs_read:
+    - framework/techniques/just-in-time-context-loading.md
+    - framework/techniques/context-compaction.md
+    - framework/constants/minimal-sufficient-context.md
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # per ADR-0006: context-loading decisions are per-step coherence choices
+                                   # in a linear agent-coding loop — not parallel research fan-out
+  skill_contract: technique-evaluable   # per ADR-0017: source pattern lives under framework/techniques/
+  # [needs-architect-review] targets_scenarios is empty because no context-pollution /
+  # minimal-sufficient-context scenario exists in framework/scenarios/ at emission time.
+  # The closest existing scenario (token-compression-style-mode) targets OUTPUT style compression,
+  # not INPUT context loading — it MUST NOT be misused here per the dispatch GUARDRAILS.
+  # This combination (technique-evaluable + empty targets_scenarios) is a known EMISSION_GAP
+  # per ADR-0013 §"Layer 4". The artifact is marked draft-incomplete on this field only.
+  # See stage5_observation below. Do NOT emit B2 cadence until a context-pollution scenario
+  # is seeded by architect Stage-5.
+  effort_level: medium
+  concern_layer: context
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending context-pollution / minimal-sufficient-context scenario seed
+  # When scenario is seeded by architect, update this field and remove draft-incomplete status.
+  # Expected scenario shape: decision-coherent, technique-tier, measuring agent task accuracy
+  # on a context-hygiene vs context-polluted baseline (see stage5_observation).
+
+constants_compliance:
+  # This Skill is NOT an Agent and invokes ZERO tools — it is a pure prompt scaffold.
+  # The Agent-tier structural constraints (select_strategy, token_budget_per_step,
+  # budget_overflow_action for agents/*.md) do not directly bind.
+  # Compliance rationale follows the zero-tool / zero-agent edge case per agent spec §B1
+  # and the curated-gotchas-retrospective-loop precedent (2026-06-02).
+  - constant: minimal-sufficient-context
+    evidence_refs: [REF-0001, REF-0034, REF-0036, REF-0033, REF-0017, REF-0019, REF-0193]
+    rationale: >
+      The Skill's ENTIRE operational claim IS the minimal-sufficient-context discipline
+      applied to the daily agent-coding loop. The `window_budget` slot realizes the
+      Constant's `token_budget_per_step` requirement; the `load_strategy` slot realizes
+      the `select_strategy`; the `compaction_trigger` slot realizes the
+      `budget_overflow_action`. The anti-pattern `fill-the-window` directly names the
+      Constant's primary anti-pattern. The `load_strategy: just-in-time` default is the
+      operationalization of "minimum sufficient context per step." The Constant's
+      agent-tier structural verification assertions (applies_to ".claude/agents/*.md")
+      bind on host Agents that DEPLOY this Skill, not on the Skill artifact itself.
+      Vacuously honored at the Skill artifact level; substantively honored at the
+      design level — the Skill operationalizes the Constant's core claim end-to-end.
+    b1_verdict: passing
+
+  - constant: typed-tool-contracts-with-feedback-loop
+    evidence_refs: []
+    rationale: >
+      vacuously honored — the constant binds on tool-using Agents; this Skill invokes
+      zero tools. The Skill's output schema (configured slots + anti-patterns table) is
+      a developer-consumed guide, not a tool-call contract. These are different contract
+      classes: the output schema is downstream-developer-consumed; the tool-call contract
+      is host-Agent-consumed. Conflating them is the category error documented in the
+      marketplace-generator agent spec (Stage-5 cycle 2026-05-21 A3).
+    b1_verdict: passing
+
+  - constant: preserve-failure-clear-redundancy
+    evidence_refs: [REF-0032, REF-0017, REF-0001]
+    rationale: >
+      Substantively honored: the Skill's compaction contract section explicitly declares
+      `failure-traces` as the FIRST mandatory entry in the preserved-categories whitelist,
+      non-negotiable. The anti-pattern `skip-compaction-across-phases` directly addresses
+      the failure mode this Constant forbids (dropping failure traces across compaction
+      boundaries). The Constant's verification assertions (applies_to agent bodies) bind
+      on host Agents; the Skill propagates the constraint to its operator via the compaction
+      contract and the preserved-categories documentation.
+    b1_verdict: passing
+
+  secondary_constants:
+    # All structurally honored via zero-tool / zero-agent vacuous path.
+    # Each is substantively honored by the Skill's design; documented for architect sign-off.
+    - context-curation-discipline     # relevance_filter slot IS the Select-pillar curation mechanism
+    - bounded-tool-surface            # JIT pattern keeps tool surface tight per-task
+    - deterministic-outer-loop        # compaction_trigger fires deterministically (threshold or phase-boundary)
+
+marketplace_metadata:
+  category: context-budget-management
+  composing_techniques:
+    - just-in-time-context-loading    # primary — load phase
+    - context-compaction              # composed — compact phase (threshold-based trigger)
+  audience: developer   # individual developers running LLM agents in coding loops
+  discovery:
+    keywords:
+      - from-framework        # provenance: derived from framework technique patterns
+      - meta-tooling          # capability: tools/skills that manage the agent harness itself
+      - productivity          # intent: daily coding loop improvement
+
+# EMISSION_GAP stage5_observation — surfaced per ADR-0013 §"Layer 4"
+stage5_observation:
+  kind: EMISSION_GAP
+  artifact: generation/skills/context-hygiene/
+  missing_tier: technique   # specifically: a scenario that discriminates context-loading/hygiene technique artifacts
+  area: null   # universal framework gap — not domain-keyed
+  proposed_name: context-pollution-accuracy-delta
+  candidate_refs:
+    - REF-0001   # Anthropic effective context — curation-over-maximization, the discipline this Skill embodies
+    - REF-0029   # LangChain context-engineering — JIT loading, auto-compact
+    - REF-0032   # Manus lessons — context pollution failure mode, failure-trace preservation
+  proposed_scenario_shape: |
+    scenario_id: context-pollution-accuracy-delta
+    task_class: decision-coherent
+    tier: technique
+    description: >
+      Measures an LLM agent's task accuracy on a multi-file coding task when operating with
+      (a) context-hygiene discipline (just-in-time loading + phase-boundary compaction, window_budget
+      sized to effective-attention envelope) vs (b) context-polluted baseline (all potentially
+      relevant files loaded upfront, no compaction, window fills progressively). Discriminates the
+      context-hygiene Skill and the just-in-time-context-loading Technique against a
+      fill-the-window baseline.
+    measurable_dimensions: [accuracy, cost-tokens]
+    baselines:
+      floor:
+        kind: zero-shot
+        description: >
+          Agent receives all potentially relevant files pre-loaded into context (fill-the-window
+          pattern). No JIT loading, no compaction, no window budget enforced. Represents the
+          context-polluted baseline that REF-0019 and REF-0036 document as accuracy-degrading.
+      reference:
+        kind: named-technique
+        technique_ref: framework/techniques/just-in-time-context-loading.md
+        description: >
+          Agent operates under context-hygiene discipline: pointer_metadata for unneeded files,
+          JIT tool-fetch on demand, phase-boundary compaction preserving failure-traces + decisions
+          + active-file-paths, window_budget at 80% of model's effective-attention envelope.
+  note: >
+    This is a load-bearing gap: without the scenario, skill_contract: technique-evaluable
+    cannot be satisfied per ADR-0017 and B2 cadence cannot proceed. The artifact is
+    draft-incomplete on the targets_scenarios field only — all other components are
+    complete and B1 passes. The REF-0019 U-curve (>20pp accuracy delta by document
+    position) + REF-0036 context-pollution finding together provide the quantitative
+    shape of what this scenario would measure.
+  draft_incomplete_field: benchmark_configuration.targets_scenarios
+  resolution_path: >
+    Architect Stage-5 seeds framework/scenarios/context-pollution-accuracy-delta/ using
+    the proposed shape above, runs ABC audit, then signals the marketplace-generator to
+    re-emit with the scenario declared. Alternatively, if an existing scenario can be
+    argued to discriminate this Technique (unlikely — token-compression-style-mode is
+    output compression, not input loading), that scenario is declared instead.

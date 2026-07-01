@@ -1,0 +1,59 @@
+# badges-draft.yaml — proposed badges for context-hygiene
+# Per ADR-0007 Pillar 6: this file is marketplace-generator-proposed only.
+# The architect's Stage-5 sign-off promotes draft to authoritative badges.yaml.
+# DO NOT rename to badges.yaml — that is architect-only write-boundary.
+
+skill_name: context-hygiene
+drafted_at: "2026-06-03"
+drafted_by: marketplace-generator-sonnet
+
+badges:
+  - badge: B1-constants-compliance
+    status: passing
+    cadence: on-emission
+    run_ref: runs/2026-06-03-on-emission-b1.yaml
+    notes: >
+      All structural checks pass. SKILL.md frontmatter declares tier/task_class/targets_scenarios.
+      5 trigger phrases (>= 3 required). Anti-patterns section present with >= 3 entries including
+      fill-the-window and dump-all-docs. Source techniques cited. composition.yaml has all 6 sections
+      plus skill_contract, draft-incomplete annotation, and EMISSION_GAP stage5_observation.
+      Constants: minimal-sufficient-context (substantively honored — Skill operationalizes the
+      constant end-to-end); typed-tool-contracts-with-feedback-loop (vacuously honored — zero-tool
+      Skill); preserve-failure-clear-redundancy (substantively honored — failure-traces mandatory
+      in compaction whitelist).
+
+  - badge: B2-scenario-benchmark
+    status: blocked
+    cadence: on-demand
+    run_ref: null
+    notes: >
+      Blocked pending scenario seed by architect Stage-5. The technique-evaluable skill_contract
+      requires a non-empty targets_scenarios. The proposed scenario (context-pollution-accuracy-delta)
+      is documented in composition.yaml stage5_observation. B2 cannot be scheduled until the
+      architect seeds framework/scenarios/context-pollution-accuracy-delta/ and the marketplace-
+      generator re-emits with the scenario declared in benchmark_configuration.targets_scenarios.
+
+  - badge: B3-pack-story
+    status: not-applicable
+    cadence: architect-triggered
+    run_ref: null
+    notes: >
+      B3 is for Workflow Pack member artifacts. This is a standalone Skill, not a Pack member.
+      Not applicable.
+
+draft_incomplete_fields:
+  - field: benchmark_configuration.targets_scenarios
+    reason: >
+      No context-pollution / minimal-sufficient-context scenario exists in framework/scenarios/
+      at emission time. EMISSION_GAP documented in composition.yaml stage5_observation. Proposed
+      scenario name: context-pollution-accuracy-delta.
+    resolution: >
+      Architect Stage-5 seeds the scenario, then marketplace-generator re-emits with the scenario
+      declared. After re-emission, remove this draft_incomplete_fields entry and trigger B2.
+
+architect_sign_off_checklist:
+  - "[ ] Verify targets_scenarios when scenario is seeded"
+  - "[ ] Promote badges-draft.yaml → badges.yaml"
+  - "[ ] Schedule B2 cadence after scenario seed"
+  - "[ ] Verify composition.yaml constants_compliance rationales are accurate"
+  - "[ ] Confirm discovery.keywords controlled vocabulary is appropriate"

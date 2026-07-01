@@ -1,0 +1,64 @@
+# badges-draft.yaml — generator-proposed badges for architect sign-off
+# Per ADR-0007 Pillar 6 and Pillar 7: generator writes draft; architect signs off (badges.yaml)
+# DO NOT rename to badges.yaml — architect-only sign-off authority (ADR-0007 §Pillar 6)
+
+artifact: generation/skills/curated-gotchas-retrospective-loop/
+emitted_at: "2026-06-02"
+emitted_by: marketplace-generator-sonnet
+skill_contract: technique-evaluable
+
+badges:
+  B1:
+    name: Constants Compliance
+    status: passing
+    cadence: on_emission
+    run_log: runs/2026-06-02T00-00-00Z-on_emission-b1.yaml
+    assertions_pass: 7
+    assertions_total: 7
+    constants_evaluated:
+      - name: minimal-sufficient-context
+        verdict: vacuously-honored-at-skill-level-substantively-honored-at-design-level
+      - name: observable-agent-traces
+        verdict: vacuously-honored-at-skill-level-substantively-honored-at-design-level
+      - name: bounded-tool-surface
+        verdict: vacuously-honored
+    notes: >
+      B1 passes clean. Zero-tool Skill; Agent-tier structural constant constraints are
+      vacuously honored per agent spec §B1 edge case (zero-tool Skills). All 7 technique
+      assertions from framework/techniques/curated-gotchas-retrospective-loop.md pass.
+    expires_when:
+      any_of:
+        - framework_constants_change: true
+        - days_elapsed: 180
+    status_after_expiry: stale
+
+  B2:
+    name: Scenario Performance
+    status: blocked-pending-scenario-seed
+    cadence: on_demand
+    run_log: null
+    notes: >
+      B2 BLOCKED — targets_scenarios is empty because no harness-improvement-loop scenario
+      exists in framework/scenarios/ at emission time. Artifact is draft-incomplete on
+      benchmark_configuration.targets_scenarios. B2 cadence cannot proceed until architect
+      Stage-5 seeds framework/scenarios/harness-gotchas-accuracy-delta/ (proposed shape in
+      composition.yaml stage5_observation). After scenario seed: operator runs
+      /benchmark-this-artifact generation/skills/curated-gotchas-retrospective-loop/ to
+      trigger B2 iteration. This blocked status does NOT affect marketplace eligibility for
+      B1 — the artifact passes B1 and is structurally complete. B2 is blocked, not failing.
+    targets_scenarios: []
+    stage5_observation_ref: composition.yaml#stage5_observation
+
+  B3:
+    name: Workflow Pack Story
+    status: not-applicable
+    notes: "B3 is Pack-tier only per ADR-0007 Pillar 3; this is a Skill artifact."
+
+overall_marketplace_eligibility:
+  b1_gate: passing
+  b2_gate: draft-incomplete   # blocked on scenario seed, not failing
+  marketplace_eligible: true   # B1 passes; B2 blocked (not failing) — eligible with draft-incomplete caveat
+  caveat: >
+    Artifact is B1-passing and structurally complete. B2 is blocked (not failing) pending
+    architect Stage-5 scenario seed. The artifact may be installed and used; B2 evaluation
+    is deferred, not impossible. Recommend architect sign-off after reviewing this draft.

@@ -1,0 +1,69 @@
+# B1 Constants Compliance run log — immutable, git-tracked
+# Per ADR-0007 Pillar 7: on-emission cadence, generator-driven, deterministic
+run_id: 2026-06-02T00-00-00Z-on_emission-b1
+artifact: generation/skills/curated-gotchas-retrospective-loop/
+cadence: on_emission
+badge_tier: B1
+judge: deterministic-structural   # no LLM judge; regex + parse checks only
+
+assertions:
+  - id: A1
+    check: "SKILL.md frontmatter declares gotchas_file_path resolving to a single file or bounded section, asserted human-curated and version-controlled (not an auto-generated doc tree)"
+    result: pass
+    detail: "gotchas_file_path: '<operator-supplied: path to the single, version-controlled, human-curated landmine file; ...>' — operator-supplied template value; explicitly asserts human-curated and version-controlled in the slot description. The value is a configuration placeholder (operator fills at deploy time), not an auto-generated path."
+
+  - id: A2
+    check: "SKILL.md frontmatter declares entry_budget as a positive integer (line or entry ceiling); null or absent fails"
+    result: pass
+    detail: "entry_budget: 600 — positive integer, reference operating point from REF-0193 (553 lines)"
+
+  - id: A3
+    check: "SKILL.md frontmatter declares capture_trigger in {post-task-retrospective, recurring-failure-threshold, human-curation-on-demand}; 'auto-generate-from-every-doc' fails"
+    result: pass
+    detail: "capture_trigger: post-task-retrospective — in allowed set"
+
+  - id: A4
+    check: "SKILL.md frontmatter declares consume_strategy in {load-full-list-before-task, retrieve-relevant-entries-by-task, inject-on-matching-precondition}; 'prepend-entire-doc-tree' fails"
+    result: pass
+    detail: "consume_strategy: load-full-list-before-task — in allowed set"
+
+  - id: A5
+    check: "SKILL.md frontmatter declares graduate_or_prune_policy in {graduate-to-durable-docs, prune-on-staleness, keep-hot}; a write-only ever-growing list fails"
+    result: pass
+    detail: "graduate_or_prune_policy: graduate-to-durable-docs — in allowed set; write-only-retrospective anti-pattern documented in SKILL.md body"
+
+  - id: A6
+    check: "If consume_strategy == load-full-list-before-task, the body asserts the list size stays under entry_budget; otherwise a retrieval/injection strategy is required"
+    result: pass
+    detail: "consume_strategy == load-full-list-before-task; body contains 'entry_budget' and 'ceiling' (multiple occurrences); 'Legal only while the file stays under entry_budget' explicitly stated in Phase 2 section; 'switch to retrieve-relevant-entries-by-task' strategy documented as mandatory escalation path"
+
+  - id: A7
+    check: "The body contains a paragraph disambiguating this Technique from reflexion (cross-session human-in-the-loop harness improvement vs within-task trial reflection)"
+    result: pass
+    detail: "Body contains dedicated disambiguation table comparing reflexion vs this Skill across 5 dimensions: scope (cross-session vs within-task), human involvement, artifact type, loop timing, failure target. 'cross-session' and 'within-task' both present."
+
+constants_compliance:
+  - constant: minimal-sufficient-context
+    verdict: vacuously-honored-at-skill-level-substantively-honored-at-design-level
+    rationale: "Constant binds on Agents (applies_to: .claude/agents/*.md); this Skill invokes zero tools and has no agent-tier frontmatter. The Skill's entire operational purpose IS an instance of this constant's core claim (lean curated list beats bloated doc tree by +20pp per REF-0193)."
+
+  - constant: observable-agent-traces
+    verdict: vacuously-honored-at-skill-level-substantively-honored-at-design-level
+    rationale: "Constant binds on Agents; this Skill invokes zero tools. The Skill's capture phase explicitly depends on the observable-agent-traces substrate existing (reads completed run traces). Dependency documented in SKILL.md body."
+
+  - constant: bounded-tool-surface
+    verdict: vacuously-honored
+    rationale: "vacuously honored — the constant binds on tool-using Agents; this Skill invokes zero tools."
+
+overall:
+  b1_result: passing
+  assertions_pass: 7
+  assertions_total: 7
+  constants_pass: 3
+  constants_total: 3
+  notes: >
+    B1 passes clean on all 7 technique assertions and all 3 primary constants.
+    Artifact is marked draft-incomplete ONLY on benchmark_configuration.targets_scenarios
+    (empty list because no harness-improvement-loop scenario exists in framework/scenarios/).
+    This draft-incomplete status does NOT affect B1 passing — B1 is structural, not scenario-dependent.
+    B2 cadence is blocked pending architect Stage-5 scenario seed (see composition.yaml stage5_observation).

@@ -1,0 +1,54 @@
+# badges-draft.yaml — proposed badges for dev-self-improvement
+# Generator-proposed only. A separate sign-off promotes draft -> authoritative badges.yaml.
+# DO NOT rename to badges.yaml — that is outside this write boundary.
+
+skill_name: dev-self-improvement
+drafted_at: "2026-07-01"
+drafted_by: generator
+
+badges:
+  - badge: B1-constants-compliance
+    status: passing
+    cadence: on-emission
+    run_ref: runs/2026-07-01-on-emission-b1.yaml
+    notes: >
+      All structural checks pass. Frontmatter leads with name + description, then tier/task_class/
+      targets_scenarios. Description carries 5 trigger phrases (>= 3 required). Body has a
+      "When this triggers" section and an anti-patterns table with 5 rows. No framework-internal
+      jargon or markdown links in the body; cross-references are by name in prose. Constants:
+      gated-durable-memory-writes and human-approval-on-irreversible-actions substantively honored
+      (human-approved AGENTS.md writes, no silent writes); minimal-sufficient-context honored
+      (leanness / graduate-or-prune anti-patterns).
+
+  - badge: B2-scenario-benchmark
+    status: blocked
+    cadence: on-demand
+    run_ref: null
+    notes: >
+      Blocked pending a scenario seed. No cross-session harness-improvement scenario exists to
+      discriminate this technique. Proposed name retrospective-improvement-adoption-delta is
+      recorded in composition.yaml stage5_observation.
+
+  - badge: B3-pack-story
+    status: applicable-pending
+    cadence: architect-triggered
+    run_ref: null
+    notes: >
+      This skill is intended as a member of the dasa-dev-toolbox pack. B3 (pack-member story)
+      is applicable but pending until the pack is authored and references this member.
+
+draft_incomplete_fields:
+  - field: benchmark_configuration.targets_scenarios
+    reason: >
+      No matching scenario exists at emission time (EMISSION_GAP in composition.yaml). Proposed
+      scenario name: retrospective-improvement-adoption-delta.
+    resolution: >
+      Seed the scenario, then re-emit with targets_scenarios populated and trigger B2.
+
+architect_sign_off_checklist:
+  - "[ ] Confirm AGENTS.md write path is human-gated in body (no silent writes)"
+  - "[ ] Verify constants_compliance rationales are accurate"
+  - "[ ] Confirm cross-link to curated-gotchas-retrospective-loop is by name only (copy-safe)"
+  - "[ ] Resolve targets_scenarios when scenario is seeded"
+  - "[ ] Confirm B3 once dasa-dev-toolbox pack references this member"
+  - "[ ] Promote badges-draft.yaml -> badges.yaml"

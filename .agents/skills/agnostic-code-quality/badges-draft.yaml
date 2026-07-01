@@ -1,0 +1,60 @@
+# badges-draft.yaml — agnostic-code-quality
+#
+# PROPOSAL-ONLY. Architect signs off via Stage-5.
+#
+# THIS FILE IS THE CANONICAL HOME for "Constants honored" rationale.
+# SKILL.md body does NOT duplicate this content. composition.yaml carries
+# only the string-ID index (constants_declared); rationale lives here.
+#
+# Audience: architect (sign-off) + marketplace badge UI (display).
+
+artifact_id: agnostic-code-quality
+artifact_path: generation/skills/agnostic-code-quality/
+artifact_tier: technique
+artifact_task_class: decision-coherent
+artifact_targets_scenarios: []
+
+b1_constants_compliance:
+  status: passing
+  checked_at: 2026-05-23
+  framework_commit: 6d31347
+  judge:
+    model_id: gemini-2.0-flash
+    version: n/a
+    prompt_hash: n/a
+  constants_checked:
+    - constant_ref: knowledge/software-craft/constants/complexity-is-incremental.md
+      verdict: passing
+      rationale: |
+        KISS and YAGNI are the primary defenses against incremental complexity. The skill 
+        directly operationalizes these constants by providing actionable rules for 
+        maintaining simplicity.
+
+    - constant_ref: knowledge/software-craft/constants/essence-vs-accident-distinction.md
+      verdict: passing
+      rationale: |
+        The principles help distinguish between the "essence" of the problem (what must be 
+        solved) and the "accident" of the implementation (unnecessary cleverness or 
+        hypothetical features).
+
+    - constant_ref: knowledge/software-craft/constants/information-hiding-as-decomposition-driver.md
+      verdict: passing
+      rationale: |
+        SOLID principles (especially SRP and ISP) are fundamental tools for effective 
+        information hiding and system decomposition.
+
+    - constant_ref: knowledge/software-craft/constants/dry-single-source-of-truth.md
+      verdict: passing
+      rationale: |
+        SRP and OCP ensure that every piece of knowledge or behavior has a single, 
+        well-defined home in the codebase, supporting the DRY principle.
+
+b2_scenarios_performance:
+  status: deferred
+  reason: |
+    No code-quality scenarios exist in framework/scenarios/ yet.
+
+issued_at: 2026-05-23
+signed_off: false
+signed_off_by: null
+signed_off_at: null

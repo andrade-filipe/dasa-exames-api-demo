@@ -1,0 +1,93 @@
+# composition.yaml — framework-classification metadata for dev-grill-me
+# The developer-facing SKILL.md carries the lean frontmatter; this file carries the rest.
+
+skill_name: dev-grill-me
+emitted_at: "2026-07-01"
+emitted_by: generator
+node: catalog/projects/dasa
+
+provenance:
+  source_technique: null   # no socratic/elicitation technique exists under framework/techniques/
+  adapted_from: operator-skill:grill-me
+  technique_tier: technique
+  notes: >
+    No socratic-elicitation / one-question-at-a-time technique exists under framework/techniques/
+    at emission time. This skill is adapted from the existing operator-facing grill-me skill and
+    reframed for a developer writing a coding task on a .NET/C# codebase (name the service/project,
+    the files, the goal, the constraints, and the verification). The absence of a formalized
+    technique is recorded as an EMISSION_GAP below; provenance is adapted-from-operator-skill rather
+    than a framework/techniques/ source until the technique is formalized.
+  closest_framework_technique: framework/techniques/plan-then-execute.md   # tangential: forces specificity before action, but not the one-question-at-a-time elicitation pattern
+  source_refs_read:
+    - framework/techniques/plan-then-execute.md
+    - framework/constants/minimal-sufficient-context.md
+    - framework/constants/deterministic-outer-loop.md
+    - framework/constants/prefer-stateless-reducer-shape.md
+    - framework/constants/human-approval-on-irreversible-actions.md
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # driving one vague request to a specific task is a coherence
+                                  # elicitation decision, not a parallel fan-out
+  skill_contract: technique-evaluable
+  effort_level: low
+  concern_layer: context
+  # [needs-architect-review] Two open items: (1) targets_scenarios empty — no elicitation scenario
+  # exists; (2) source_technique null — no socratic-elicitation technique exists under
+  # framework/techniques/, so provenance is adapted-from-operator-skill. Both surfaced in
+  # stage5_observation. Marked draft-incomplete on targets_scenarios only.
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending a prompt-specificity / elicitation scenario seed
+
+constants_compliance:
+  - constant: minimal-sufficient-context
+    rationale: >
+      The skill's entire purpose is to raise the input signal so the assistant acts on a
+      minimal-sufficient, high-specificity task rather than a vague one. Grilling to name files,
+      goal, constraints, and verification is the elicitation-side realization of getting the
+      right context in before action.
+    b1_verdict: passing
+  - constant: human-approval-on-irreversible-actions
+    rationale: >
+      By blocking action until the task is specific and agreed, the skill inserts a human
+      checkpoint before any code change begins — the developer confirms the goal and acceptance
+      criteria before edits land. Honored at the interaction level.
+    b1_verdict: passing
+  - constant: deterministic-outer-loop
+    rationale: >
+      The interview has a deterministic stop predicate: continue asking while files/goal/
+      constraints/verification are unresolved; stop once all four are pinned. Termination is a
+      structural sufficiency check, not an open-ended model whim. The "grill past sufficiency"
+      anti-pattern names the failure to terminate.
+    b1_verdict: passing
+  secondary_constants:
+    - prefer-stateless-reducer-shape   # the interview state (which axes resolved) can be reconstructed from the transcript; no hidden in-memory state
+
+marketplace_metadata:
+  audience: developer
+  discovery:
+    keywords:
+      - meta-tooling    # improves how the developer drives the assistant
+      - productivity    # prevents wasted work on a misread task
+
+# EMISSION_GAP(s) — surfaced per the emission-gap protocol
+stage5_observation:
+  - kind: EMISSION_GAP
+    artifact: catalog/projects/dasa/skills/dev-grill-me/
+    missing_tier: technique
+    reason: >
+      No socratic-elicitation / one-question-at-a-time technique exists under framework/techniques/.
+      This skill is adapted from the operator-facing grill-me skill; source_technique is null and
+      provenance is adapted-from-operator-skill. A formalized technique would let provenance point at
+      a framework/ source and satisfy skill_contract: technique-evaluable properly.
+    proposed_name: socratic-specificity-elicitation
+  - kind: EMISSION_GAP
+    artifact: catalog/projects/dasa/skills/dev-grill-me/
+    missing_tier: scenario
+    reason: >
+      No scenario exists to discriminate a prompt-specificity elicitation technique (measure
+      downstream task success on grilled vs un-grilled prompts). targets_scenarios stays [] and B2
+      cannot proceed until seeded.
+    proposed_name: prompt-specificity-success-delta
+    draft_incomplete_field: benchmark_configuration.targets_scenarios

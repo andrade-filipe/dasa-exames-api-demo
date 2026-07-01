@@ -1,0 +1,35 @@
+run_id: 2026-07-01-on-emission-b1
+cadence: on-emission
+timestamp: "2026-07-01"
+framework_commit: main
+artifact: catalog/projects/dasa/packs/dasa-dev-toolbox/
+
+b1_checks:
+  frontmatter_validation:
+    status: passing
+    rationale: >
+      manifest.md carries tier, task_class, pack_name, member_agents (3), member_skills (9),
+      orchestration_substrate. Each member agent file carries tier + task_class. Shapes mirror the
+      universal rpi-pipeline exemplar.
+  member_resolution:
+    status: passing
+    rationale: >
+      All 3 member agents exist under this pack's agents/. All 9 member_skills resolve to real
+      catalog/**/skills/<id>/ dirs (3 in-node under catalog/projects/dasa/skills/, 6 cross-node).
+  constants_compliance:
+    status: passing
+    rationale: >
+      All 6 declared constants (externalize-resumption-state, human-approval-on-irreversible-actions,
+      deterministic-outer-loop, prefer-stateless-reducer-shape, minimal-sufficient-context,
+      preserve-failure-clear-redundancy) are structural invariants honored by the pack's agents and
+      glue. Rationale detailed in badges-draft.yaml.
+  stop_predicate_check:
+    status: passing
+    rationale: >
+      Each agent has a concrete artifact/predicate stop condition and a Loop control note; no
+      "continue until you feel/until satisfied" language present.
+
+b2_status: blocked   # no matching framework scenario for a .NET dev pipeline
+b3_status: applicable
+
+verdict: passing

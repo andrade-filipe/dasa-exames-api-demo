@@ -1,0 +1,39 @@
+artifact_id: adversarial-code-reviewer
+artifact_kind: skill
+
+framework_classification:
+  tier: discipline
+  skill_contract: discipline-verifiable
+  task_class: decision-coherent
+  concern_layer: engineering-discipline
+  effort_level: L1
+  emitted_by: gemini-cli
+  emitted_at: 2026-05-22
+  framework_commit: main
+  fact_sheet_ref: null
+
+source_provenance:
+  license: MIT
+  source_author: ekreloff
+  source_url: https://skills.sh/alirezarezvani/claude-skills/adversarial-reviewer
+  our_modifications: "L1 adaptation: Flattened nested personas into core priorities; enforced 'Mandatory findings' as the central discipline."
+
+benchmark_configuration:
+  targets_scenarios: []
+  benchmark_priority: tier-2
+  scenario_seeding_open_item: true
+
+constants_declared:
+  - observable-agent-traces
+  - information-hiding-as-decomposition-driver
+
+composition_graph:
+  depends_on: []
+  extends: null
+  composes_with: []
+  invokes: []
+  alternatives:
+    - bmad-method/code-review
+
+discovery:
+  keywords: [from-repo, code-review, review-code, harden-security]

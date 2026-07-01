@@ -1,0 +1,89 @@
+# composition.yaml — framework-classification metadata for dev-self-improvement
+# The developer-facing SKILL.md carries the lean frontmatter; this file carries the rest.
+
+skill_name: dev-self-improvement
+emitted_at: "2026-07-01"
+emitted_by: generator
+node: catalog/projects/dasa
+
+provenance:
+  source_technique: framework/techniques/curated-gotchas-retrospective-loop.md
+  technique_tier: technique
+  notes: >
+    Direct grounding. This skill is the broader propose-and-approve engine around the
+    curated-gotchas-retrospective-loop technique: capture (post-task retrospective) ->
+    distill (concrete edits to AGENTS.md and/or a team skill) -> consume (the next session
+    loads the improvement). It generalizes the technique from "one lean landmine list" to
+    "any human-approved improvement to the team's shared setup," while delegating the
+    disciplined, bounded landmine subset back to curated-gotchas-retrospective-loop.
+  source_refs_read:
+    - framework/techniques/curated-gotchas-retrospective-loop.md
+    - framework/constants/gated-durable-memory-writes.md
+    - framework/constants/human-approval-on-irreversible-actions.md
+    - framework/constants/prefer-stateless-reducer-shape.md
+    - framework/constants/deterministic-outer-loop.md
+    - framework/constants/minimal-sufficient-context.md
+
+framework_classification:
+  tier: technique
+  task_class: decision-coherent   # capturing + distilling one session's lessons into a coherent
+                                  # set of proposed edits is a per-session coherence decision,
+                                  # not a parallel fan-out
+  skill_contract: technique-evaluable   # source pattern lives under framework/techniques/
+  effort_level: medium
+  concern_layer: harness
+  # [needs-architect-review] targets_scenarios is empty: no cross-session harness-improvement
+  # scenario exists to discriminate this technique at emission time. Marked draft-incomplete on
+  # this field only; see stage5_observation. Do NOT schedule B2 until a scenario is seeded.
+
+benchmark_configuration:
+  targets_scenarios: []   # draft-incomplete — pending a self-improvement / retrospective-loop scenario seed
+
+constants_compliance:
+  - constant: gated-durable-memory-writes
+    rationale: >
+      Core of the skill. AGENTS.md is the durable cross-session memory substrate; the
+      write_validation_gate is human-in-the-loop-approval — phase 3 presents every proposed edit
+      for an explicit yes before writing, and forbids silent writes. The forget/revise path is
+      covered by the graduate-or-prune guidance (stale entries pruned, stabilized ones graduated).
+      The skill is the developer-facing realization of this constant applied to AGENTS.md.
+    b1_verdict: passing
+  - constant: human-approval-on-irreversible-actions
+    rationale: >
+      Editing shared team memory is treated as an irreversible, side-effecting action: it is read
+      by every future session. The approval mechanism is an explicit human yes on the shown diff,
+      not a prompt confirmation buried in prose. The "Silent memory write" anti-pattern names the
+      bypass failure directly.
+    b1_verdict: passing
+  - constant: minimal-sufficient-context
+    rationale: >
+      The leanness discipline (system-specific failures only, graduate-or-prune, no
+      general-knowledge gotchas, no unbounded growth) keeps AGENTS.md high-signal so future
+      sessions reload minimal-sufficient context rather than a bloated memory file. Three
+      anti-patterns enforce this.
+    b1_verdict: passing
+  secondary_constants:
+    - deterministic-outer-loop      # capture is automatic at task end; the durable-write step is a deterministic human gate, not a model whim
+    - prefer-stateless-reducer-shape # all durable state lives in AGENTS.md / skill files, not in-session memory
+    - preserve-failure-clear-redundancy # the retrospective preserves recurring failures as durable landmines, clears one-off noise
+
+marketplace_metadata:
+  audience: developer
+  discovery:
+    keywords:
+      - from-framework    # grounded in curated-gotchas-retrospective-loop
+      - meta-tooling      # improves the team's own harness/skills
+      - productivity      # turns friction into durable improvement
+
+# EMISSION_GAP — surfaced because targets_scenarios could not be populated
+stage5_observation:
+  kind: EMISSION_GAP
+  artifact: catalog/projects/dasa/skills/dev-self-improvement/
+  missing_tier: scenario
+  reason: >
+    No scenario exists under framework/scenarios/ that discriminates a cross-session, human-in-the-
+    loop harness-improvement technique (capture -> distill -> approved durable write). targets_scenarios
+    stays [] and B2 cannot proceed until such a scenario is seeded. All other components are complete
+    and B1 passes.
+  proposed_name: retrospective-improvement-adoption-delta
+  draft_incomplete_field: benchmark_configuration.targets_scenarios

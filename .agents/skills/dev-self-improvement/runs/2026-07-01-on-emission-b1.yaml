@@ -1,0 +1,72 @@
+# B1 Constants Compliance run log — immutable append-only. On-emission cadence.
+
+run_id: 2026-07-01-on-emission-b1
+artifact: catalog/projects/dasa/skills/dev-self-improvement/
+cadence: on-emission
+timestamp: "2026-07-01T00:00:00Z"
+executor: generator
+
+checks:
+  # Frontmatter shape (Codex implicit-invocation contract: name + description lead)
+  - check: "frontmatter leads with name then description"
+    result: pass
+  - check: "tier: technique present"
+    result: pass
+  - check: "task_class: decision-coherent present"
+    result: pass
+  - check: "targets_scenarios: [] present (draft-incomplete)"
+    result: pass
+
+  # Description trigger density
+  - check: "description contains a Trigger phrases list with >= 3 entries"
+    result: pass
+    detail: "5 trigger phrases"
+
+  # Body structure
+  - check: "## When this triggers section present (AUTO + MANUAL documented)"
+    result: pass
+  - check: "## Anti-patterns section present with >= 3 rows"
+    result: pass
+    detail: "5 rows incl. Silent memory write, Write-only retro, Improvement theater"
+  - check: "self-adaptation purpose stated explicitly in body"
+    result: pass
+  - check: "curated-gotchas-retrospective-loop cross-linked by name in prose (no relative link)"
+    result: pass
+
+  # Copy-safety (deploys into .agents/skills/)
+  - check: "body contains no CLAUDE.md reference"
+    result: pass
+  - check: "body contains no ADR- / pyramid / operator / harness-emission jargon"
+    result: pass
+  - check: "durable memory file named as AGENTS.md (Codex convention), not CLAUDE.md"
+    result: pass
+  - check: "body contains no framework-internal markdown links"
+    result: pass
+
+  # Constants
+  - check: "gated-durable-memory-writes honored (human-approved AGENTS.md writes)"
+    result: pass
+  - check: "human-approval-on-irreversible-actions honored (explicit yes before write)"
+    result: pass
+  - check: "minimal-sufficient-context honored (leanness / graduate-or-prune)"
+    result: pass
+
+  # composition.yaml completeness
+  - check: "composition.yaml provenance / framework_classification / constants_compliance present"
+    result: pass
+  - check: "stage5_observation EMISSION_GAP present (targets_scenarios gap)"
+    result: pass
+
+  # Write boundary
+  - check: "no file written outside catalog/projects/dasa/skills/dev-self-improvement/"
+    result: pass
+  - check: "badges.yaml (without -draft) NOT created"
+    result: pass
+
+overall:
+  b1_verdict: passing
+  failures: 0
+  total_checks: 21
+  notes: >
+    All structural B1 checks pass. targets_scenarios intentionally draft-incomplete pending a
+    scenario seed (EMISSION_GAP recorded). Body is copy-safe for deployment into .agents/skills/.

@@ -1,0 +1,59 @@
+# badges-draft.yaml — proposed badges for dev-grill-me
+# Generator-proposed only. A separate sign-off promotes draft -> authoritative badges.yaml.
+# DO NOT rename to badges.yaml — that is outside this write boundary.
+
+skill_name: dev-grill-me
+drafted_at: "2026-07-01"
+drafted_by: generator
+
+badges:
+  - badge: B1-constants-compliance
+    status: passing
+    cadence: on-emission
+    run_ref: runs/2026-07-01-on-emission-b1.yaml
+    notes: >
+      All structural checks pass. Frontmatter leads with name + description, then tier/task_class/
+      targets_scenarios. Description carries 4 match-friendly trigger phrases (>= 3 required). Body
+      has a "When this triggers" section, a one-question-at-a-time behavior with .NET/C#-framed
+      examples, and a 5-row anti-patterns table. No framework jargon or markdown links in the body.
+      Constants: minimal-sufficient-context, human-approval-on-irreversible-actions, and
+      deterministic-outer-loop (deterministic sufficiency stop predicate) honored.
+
+  - badge: B2-scenario-benchmark
+    status: blocked
+    cadence: on-demand
+    run_ref: null
+    notes: >
+      Blocked pending a scenario seed. No prompt-specificity elicitation scenario exists. Proposed
+      name prompt-specificity-success-delta is recorded in composition.yaml stage5_observation.
+
+  - badge: B3-pack-story
+    status: applicable-pending
+    cadence: architect-triggered
+    run_ref: null
+    notes: >
+      Intended as a member of the dasa-dev-toolbox pack. B3 is applicable but pending until the
+      pack is authored and references this member.
+
+draft_incomplete_fields:
+  - field: benchmark_configuration.targets_scenarios
+    reason: >
+      No matching scenario exists at emission time (EMISSION_GAP in composition.yaml). Proposed
+      scenario name: prompt-specificity-success-delta.
+    resolution: >
+      Seed the scenario, then re-emit with targets_scenarios populated and trigger B2.
+
+notes_for_review:
+  - >
+    Provenance is adapted-from-operator-skill (grill-me), not a framework/techniques/ source: no
+    socratic-elicitation technique exists yet. A second EMISSION_GAP (proposed
+    socratic-specificity-elicitation technique) is recorded. skill_contract remains
+    technique-evaluable on the expectation that the technique gets formalized.
+
+architect_sign_off_checklist:
+  - "[ ] Decide whether to formalize a socratic-specificity-elicitation technique (EMISSION_GAP)"
+  - "[ ] Verify constants_compliance rationales are accurate"
+  - "[ ] Confirm examples are .NET/C#-framed and jargon-free (copy-safe)"
+  - "[ ] Resolve targets_scenarios when scenario is seeded"
+  - "[ ] Confirm B3 once dasa-dev-toolbox pack references this member"
+  - "[ ] Promote badges-draft.yaml -> badges.yaml"
