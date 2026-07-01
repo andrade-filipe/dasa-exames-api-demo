@@ -133,6 +133,150 @@ public class ResultadoServiceTests
         Assert.DoesNotContain("4.2", mensagem);
     }
 
+    [Fact]
+    public void CancelarResultado_QuandoPendenteComMotivo_DeveCancelarComUtcEGuardarMotivo()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+        const string motivo = "Amostra comprometida";
+
+        // Act
+        var resultadoCancelado = service.CancelarResultado(resultado.Id, motivo);
+
+        // Assert
+        Assert.Equal(StatusResultado.Cancelado, resultadoCancelado.Status);
+        Assert.NotNull(resultadoCancelado.CanceladoEm);
+        Assert.Equal(DateTimeKind.Utc, resultadoCancelado.CanceladoEm!.Value.Kind);
+        Assert.Equal(motivo, resultadoCancelado.MotivoCancelamento);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoResultadoNaoExiste_DeveLancarResultadoNaoEncontradoException()
+    {
+        // Arrange
+        var repo = new RepositorioMemoria();
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = new ResultadoService(repo, logger);
+
+        // Act
+        Action acao = () => service.CancelarResultado(Guid.NewGuid(), "Amostra comprometida");
+
+        // Assert
+        Assert.Throws<ResultadoNaoEncontradoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoStatusLiberado_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Liberado, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoStatusCancelado_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Cancelado, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoMotivoNulo_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, null);
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoMotivoEmBranco_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "   ");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoMotivoContemDadoSensivel_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Paciente Maria CPF 12345678900");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoViolacaoNaoDeveAlterarStatusNemCanceladoEmNemMotivo()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Liberado, 4.2, logger, out var resultado);
+        var statusOriginal = resultado.Status;
+        var canceladoEmOriginal = resultado.CanceladoEm;
+        var motivoOriginal = resultado.MotivoCancelamento;
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+        Assert.Equal(statusOriginal, resultado.Status);
+        Assert.Equal(canceladoEmOriginal, resultado.CanceladoEm);
+        Assert.Equal(motivoOriginal, resultado.MotivoCancelamento);
+    }
+
+    [Fact]
+    public void CancelarResultado_LogNaoDeveConterNomeCpfValorOuMotivo()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+        const string motivo = "Amostra comprometida";
+
+        // Act
+        _ = service.CancelarResultado(resultado.Id, motivo);
+
+        // Assert
+        Assert.NotEmpty(logger.Messages);
+        var mensagem = logger.Messages.Single();
+        Assert.Contains(resultado.Id.ToString(), mensagem);
+        Assert.DoesNotContain("Maria", mensagem);
+        Assert.DoesNotContain("12345678900", mensagem);
+        Assert.DoesNotContain("4.2", mensagem);
+        Assert.DoesNotContain(motivo, mensagem);
+    }
+
     private static ResultadoService CriarServiceComResultado(
         StatusResultado status,
         double? valor,

@@ -53,3 +53,16 @@ Leia PLAN.md e implemente exatamente o plano. Requisitos obrigatorios: refatorar
 Revise o diff como um Auditor de Segurança: sobrou alguma exposição de dado sensível de
 paciente (CPF, nome, valor clínico) em log, retorno de API ou mensagem de erro? Aponte com
 arquivo e linha.
+
+## Implement — 6
+
+Implemente o cancelamento de resultado, seguindo o AGENTS.md e o MESMO padrão do liberar:
+- POST /resultados/{id:guid}/cancelar recebendo um motivo (string, obrigatório, não vazio)
+- regra: só cancela resultado em Pendente ou EmAnalise; não cancela Liberado nem recancela Cancelado
+- ao cancelar: Status = Cancelado, CanceladoEm em UTC, e guarda o Motivo
+- erros no mesmo padrão do liberar (exceção de domínio → NotFound / UnprocessableEntity)
+- Motivo e logs NUNCA podem conter dado de paciente (compliance)
+- testes xUnit (AAA) cobrindo caminho feliz e cada violação; sincronize docs/resultados.md
+Me mostre o diff e rode dotnet test.
+
+$agnostic-code-quality $dotnet-xunit-testing $verify-and-doc
