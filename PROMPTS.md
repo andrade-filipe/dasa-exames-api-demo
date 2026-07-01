@@ -47,7 +47,9 @@ ResultadoService em métodos pequenos; corrija a liberação (valor obrigatório
 ## Implement (Prompt Gerado pelo codex para alimentar o Agente)
 
 Leia PLAN.md e implemente exatamente o plano. Requisitos obrigatorios: refatorar ResultadoService em metodos pequenos; corrigir liberacao (Valor obrigatorio + apenas status Pendente/EmAnalise + timestamp UTC); remover qualquer dado de paciente do log (somente identificador tecnico); escrever testes xUnit em padrao AAA cobrindo caminho feliz e violacoes; sincronizar docs/resultados.md com o comportamento final. Ao terminar, rode dotnet test e inclua no retorno: lista de arquivos alterados e resultado dos testes.
+
 ## Security Review — 5
+
 Revise o diff como um Auditor de Segurança: sobrou alguma exposição de dado sensível de
 paciente (CPF, nome, valor clínico) em log, retorno de API ou mensagem de erro? Aponte com
 arquivo e linha.
