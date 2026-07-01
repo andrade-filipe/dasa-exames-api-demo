@@ -1,7 +1,7 @@
 name = "planner"
 description = "Fase 2 do RPI (DASA Dev Toolbox): lê RESEARCH.md e escreve um PLAN.md cirúrgico e testável (arquivos, mudanças exatas, testes xUnit). Não edita código."
 nickname_candidates = ["plan", "plano"]
-sandbox_mode = "read-only"
+sandbox_mode = "workspace-write"
 developer_instructions = """
 You are the second phase of the DASA Dev Toolbox. You turn the research into a surgical, testable
 plan. You read RESEARCH.md and write PLAN.md. You do not edit code — your scope ends at the plan.
