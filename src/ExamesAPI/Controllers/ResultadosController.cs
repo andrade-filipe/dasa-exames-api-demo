@@ -24,7 +24,18 @@ public class ResultadosController : ControllerBase
     [HttpPost("{id:guid}/liberar")]
     public ActionResult<ResultadoExame> Liberar(Guid id)
     {
-        var resultado = _service.LiberarResultado(id);
-        return Ok(resultado);
+        try
+        {
+            var resultado = _service.LiberarResultado(id);
+            return Ok(resultado);
+        }
+        catch (ResultadoNaoEncontradoException ex)
+        {
+            return NotFound(new { erro = ex.Message });
+        }
+        catch (RegraLiberacaoException ex)
+        {
+            return UnprocessableEntity(new { erro = ex.Message });
+        }
     }
 }

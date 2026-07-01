@@ -14,33 +14,49 @@ public class ResultadoService
         _logger = logger;
     }
 
-    // TODO(legado): este método cresceu demais ao longo do tempo. Mistura busca,
-    // validação, liberação, auditoria e notificação num bloco só. Ninguém mexe com confiança.
     public ResultadoExame LiberarResultado(Guid resultadoId)
     {
-        var r = _repo.Resultados.FirstOrDefault(x => x.Id == resultadoId);
-        if (r == null)
-            throw new InvalidOperationException("Resultado não encontrado");
-
-        var paciente = _repo.Pacientes.FirstOrDefault(p => p.Id == r.PacienteId);
-
-        // Libera o resultado.
-        r.Status = StatusResultado.Liberado;
-        r.LiberadoEm = DateTime.Now;
-
-        // Auditoria.
-        _logger.LogInformation(
-            "Resultado {Id} do paciente {Nome} (CPF {Cpf}) liberado com valor {Valor}",
-            r.Id, paciente?.Nome, paciente?.Cpf, r.Valor);
-
-        // Notifica interessados.
-        Notificar(paciente, r);
-
-        return r;
+        var resultado = ObterResultadoOuFalhar(resultadoId);
+        ValidarElegibilidadeLiberacao(resultado);
+        Liberar(resultado);
+        RegistrarAuditoria(resultado);
+        Notificar(resultado);
+        return resultado;
     }
 
-    private void Notificar(Paciente? paciente, ResultadoExame r)
+    private ResultadoExame ObterResultadoOuFalhar(Guid resultadoId)
     {
-        // stub — enviaria e-mail / webhook ao paciente e ao médico solicitante.
+        var resultado = _repo.Resultados.FirstOrDefault(x => x.Id == resultadoId);
+        if (resultado is null)
+            throw new ResultadoNaoEncontradoException(resultadoId);
+
+        return resultado;
+    }
+
+    private static void ValidarElegibilidadeLiberacao(ResultadoExame resultado)
+    {
+        if (resultado.Valor is null)
+            throw new RegraLiberacaoException("Resultado sem valor apurado nao pode ser liberado.");
+
+        if (resultado.Status is not StatusResultado.Pendente and not StatusResultado.EmAnalise)
+            throw new RegraLiberacaoException("Somente resultados pendentes ou em analise podem ser liberados.");
+    }
+
+    private static void Liberar(ResultadoExame resultado)
+    {
+        resultado.Status = StatusResultado.Liberado;
+        resultado.LiberadoEm = DateTime.UtcNow;
+    }
+
+    private void RegistrarAuditoria(ResultadoExame resultado)
+    {
+        _logger.LogInformation("Resultado {ResultadoId} liberado.", resultado.Id);
+    }
+
+    private void Notificar(ResultadoExame resultado)
+    {
+        var paciente = _repo.Pacientes.FirstOrDefault(p => p.Id == resultado.PacienteId);
+        _ = paciente;
+        // stub - enviaria e-mail / webhook ao paciente e ao medico solicitante.
     }
 }

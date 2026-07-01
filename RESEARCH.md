@@ -1,113 +1,60 @@
 # RESEARCH
 
 ## 1. Goal
-Mapear o repositorio `C:\Users\Filipe\Repos\dasa-exames-api-demo` e documentar, com evidencia em arquivos reais, a arquitetura atual, o fluxo principal, as regras de dominio implementadas (e nao implementadas), os pontos de teste existentes e os riscos/gaps para evolucao segura.
+Auditar o fluxo de liberacao de resultado no ExamesAPI (Controller -> Service -> Repositorio) contra as regras do `AGENTS.md`, sem alterar codigo, e listar problemas objetivos em tres categorias: correcao funcional, compliance e cobertura de testes, com evidencia de arquivo e linha.
 
 ## 2. Impacted files
-Arquivos criticos para entendimento e possiveis mudancas relacionadas ao fluxo de resultados:
-
-- `src/ExamesAPI/Program.cs` (bootstrap da API, DI, roteamento de controllers e seed inicial).
-- `src/ExamesAPI/Controllers/ResultadosController.cs` (endpoint de liberacao e listagem de resultados).
-- `src/ExamesAPI/Services/ResultadoService.cs` (regra de negocio central de liberacao).
-- `src/ExamesAPI/Infra/RepositorioMemoria.cs` (persistencia in-memory compartilhada por controllers/servico).
-- `src/ExamesAPI/Infra/SeedData.cs` (dados iniciais que influenciam comportamento da demo).
-- `src/ExamesAPI/Domain/ResultadoExame.cs` (estado e campos de negocio do resultado).
-- `src/ExamesAPI/Domain/StatusResultado.cs` (estados validos de resultado).
-- `src/ExamesAPI/Domain/Paciente.cs` (dados sensiveis presentes no dominio e usados no log).
-- `src/ExamesAPI/Controllers/PacientesController.cs` (entrada de dados de paciente sem validacao).
-- `tests/ExamesAPI.Tests/UnitTest1.cs` (cobertura atual real).
-- `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj` (stack de testes/coverage).
-- `src/ExamesAPI/ExamesAPI.csproj` (target framework e dependencias da API).
-- `src/ExamesAPI/obj/project.assets.json` (framework references efetivas restauradas).
-- `docs/resultados.md` (documentacao funcional atualmente desatualizada).
-- `README.md` (contexto do repositorio e problemas plantados).
+- `src/ExamesAPI/Controllers/ResultadosController.cs` (endpoint `POST /resultados/{id}/liberar`, delegacao para service) [linhas 24-29].
+- `src/ExamesAPI/Services/ResultadoService.cs` (regra principal de liberacao, log/auditoria, timestamp) [linhas 19-39].
+- `src/ExamesAPI/Infra/RepositorioMemoria.cs` (armazenamento in-memory de resultados/pacientes/exames) [linhas 6-10].
+- `src/ExamesAPI/Domain/ResultadoExame.cs` (campos `Valor`, `Status`, `LiberadoEm`) [linhas 10, 13, 16].
+- `src/ExamesAPI/Domain/StatusResultado.cs` (estados permitidos) [linhas 5-8].
+- `src/ExamesAPI/Infra/SeedData.cs` (estado inicial usado na demo, com `Valor = null` e `Pendente`) [linhas 23-31].
+- `src/ExamesAPI/Program.cs` (registro DI de `ResultadoService` e `RepositorioMemoria`) [linhas 9-10, 22].
+- `tests/ExamesAPI.Tests/UnitTest1.cs` (suite atual de testes; sem testes de regra de liberacao) [linhas 3-11].
+- `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj` (dependencias xUnit/SDK/cobertura) [linhas 11-14, 22].
+- `AGENTS.md` (regras de dominio/compliance usadas como criterio de auditoria).
 
 ## 3. Symbols & logic
-Fluxo principal (resultado):
-
-1. `Program` configura DI e pipeline HTTP:
-- `builder.Services.AddSingleton<RepositorioMemoria>()` em `src/ExamesAPI/Program.cs`.
-- `builder.Services.AddScoped<ResultadoService>()` em `src/ExamesAPI/Program.cs`.
-- `app.MapControllers()` em `src/ExamesAPI/Program.cs`.
-- `SeedData.Popular(...)` em `src/ExamesAPI/Program.cs`.
-
-2. Endpoint de liberacao:
-- `ResultadosController.Liberar(Guid id)` em `src/ExamesAPI/Controllers/ResultadosController.cs` recebe `POST /resultados/{id}/liberar` e delega para `_service.LiberarResultado(id)`.
-
-3. Regra executada hoje no servico:
-- `ResultadoService.LiberarResultado(Guid resultadoId)` em `src/ExamesAPI/Services/ResultadoService.cs`:
-  - busca resultado por `Id` em `_repo.Resultados`.
-  - se nao encontrar, lanca `InvalidOperationException("Resultado nao encontrado")`.
-  - busca paciente por `PacienteId`.
-  - define `r.Status = StatusResultado.Liberado`.
-  - define `r.LiberadoEm = DateTime.Now`.
-  - registra log com `Id`, `Nome`, `Cpf`, `Valor`.
-  - chama `Notificar(paciente, r)` (stub sem efeito).
-
-4. Modelo de dados de dominio:
-- `ResultadoExame` em `src/ExamesAPI/Domain/ResultadoExame.cs` contem `Valor` nullable, `Status` default `Pendente`, `LiberadoEm` documentado como UTC.
-- Estados possiveis em `StatusResultado` (`Pendente`, `EmAnalise`, `Liberado`, `Cancelado`) em `src/ExamesAPI/Domain/StatusResultado.cs`.
-- `Paciente` contem `Nome` e `Cpf` em `src/ExamesAPI/Domain/Paciente.cs`.
-
-5. Fluxo de pacientes:
-- `PacientesController.Criar(Paciente paciente)` em `src/ExamesAPI/Controllers/PacientesController.cs` adiciona direto em memoria e possui TODO explicito de ausencia de validacao de nome/CPF.
+- `ResultadosController.Liberar(Guid id)` chama diretamente `_service.LiberarResultado(id)` e retorna `Ok(resultado)` sem tratamento de excecoes [src/ExamesAPI/Controllers/ResultadosController.cs:25-29].
+- `ResultadoService.LiberarResultado(Guid resultadoId)`:
+  - busca resultado por id no repositorio [src/ExamesAPI/Services/ResultadoService.cs:21];
+  - lanca `InvalidOperationException` se nao encontrado [linha 23];
+  - busca paciente por `PacienteId` [linha 25];
+  - define `Status = Liberado` incondicionalmente [linha 28];
+  - define `LiberadoEm = DateTime.Now` [linha 29];
+  - registra log com `Nome`, `Cpf` e `Valor` [linhas 32-34];
+  - chama `Notificar(...)` (stub) [linhas 37, 42-45].
+- Modelo de dominio:
+  - `ResultadoExame.Valor` e nullable [src/ExamesAPI/Domain/ResultadoExame.cs:10];
+  - `Status` default `Pendente` [linha 13];
+  - `LiberadoEm` documentado como UTC [linha 15-16].
+- Estados disponiveis: `Pendente`, `EmAnalise`, `Liberado`, `Cancelado` [src/ExamesAPI/Domain/StatusResultado.cs:5-8].
+- Seed da demo cria resultado `Pendente` com `Valor = null` [src/ExamesAPI/Infra/SeedData.cs:23-31], exercitando um caso em que liberacao deveria ser bloqueada pelas regras do AGENTS.
 
 ## 4. Dependencies
-Dependencias internas (cadeia de chamadas):
+Internas (cadeia de chamada):
+- HTTP `POST /resultados/{id}/liberar` -> `ResultadosController.Liberar` -> `ResultadoService.LiberarResultado` -> `RepositorioMemoria.Resultados/Pacientes` [src/ExamesAPI/Controllers/ResultadosController.cs:24-29; src/ExamesAPI/Services/ResultadoService.cs:21-25; src/ExamesAPI/Infra/RepositorioMemoria.cs:8-10].
+- `ResultadoService` depende de `ILogger<ResultadoService>` para auditoria [src/ExamesAPI/Services/ResultadoService.cs:9, 11-14, 32-34].
 
-- HTTP `POST /resultados/{id}/liberar`
-  -> `ResultadosController.Liberar` (`src/ExamesAPI/Controllers/ResultadosController.cs`)
-  -> `ResultadoService.LiberarResultado` (`src/ExamesAPI/Services/ResultadoService.cs`)
-  -> `RepositorioMemoria.Resultados/Pacientes` (`src/ExamesAPI/Infra/RepositorioMemoria.cs`).
-
-- Inicializacao da aplicacao:
-  -> `Program` (`src/ExamesAPI/Program.cs`)
-  -> `SeedData.Popular` (`src/ExamesAPI/Infra/SeedData.cs`)
-  -> carga de `Paciente`, `Exame`, `ResultadoExame` inicial sem valor.
-
-Dependencias externas (NuGet/framework):
-
-- API Web:
-  - `Microsoft.NET.Sdk.Web` no projeto `src/ExamesAPI/ExamesAPI.csproj`.
-  - framework reference efetiva `Microsoft.AspNetCore.App` em `src/ExamesAPI/obj/project.assets.json`.
-
+Externas (NuGet):
+- API:
+  - `Swashbuckle.AspNetCore` [src/ExamesAPI/ExamesAPI.csproj:10].
 - Testes:
-  - `xunit` 2.9.3 em `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj`.
-  - `xunit.runner.visualstudio` 3.1.4 em `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj`.
-  - `Microsoft.NET.Test.Sdk` 17.14.1 em `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj`.
-  - `coverlet.collector` 6.0.4 em `tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj`.
+  - `xunit`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk`, `coverlet.collector` [tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj:11-14].
 
 ## 5. Findings & risks
-Observacoes objetivas com risco associado:
+### Correcao funcional
+- Violacao da pre-condicao de valor apurado: o service libera mesmo com `Valor = null`, pois nao ha validacao antes de setar `Status = Liberado` [src/ExamesAPI/Services/ResultadoService.cs:28] e a seed cria exatamente esse cenario [src/ExamesAPI/Infra/SeedData.cs:28-31].
+- Violacao de estados de origem: o service nao restringe liberacao para apenas `Pendente`/`EmAnalise`; qualquer estado vira `Liberado` (inclusive `Cancelado` e ja `Liberado`) [src/ExamesAPI/Services/ResultadoService.cs:28; src/ExamesAPI/Domain/StatusResultado.cs:5-8].
+- Contrato HTTP pouco robusto para erro funcional: quando resultado nao existe, o service lanca `InvalidOperationException` [src/ExamesAPI/Services/ResultadoService.cs:23] e o controller nao trata, retornando erro nao mapeado em vez de resposta de dominio controlada [src/ExamesAPI/Controllers/ResultadosController.cs:25-29].
 
-1. Violacao de compliance de dados sensiveis no log.
-- Evidencia: `ResultadoService.LiberarResultado` loga `Nome`, `Cpf` e `Valor` em `src/ExamesAPI/Services/ResultadoService.cs`.
-- Risco: exposicao de PII e dado clinico em trilhas de auditoria/aplicacao.
+### Compliance
+- Exposicao de dado sensivel em log: mensagem inclui `Nome`, `Cpf` e `Valor` em texto claro [src/ExamesAPI/Services/ResultadoService.cs:33-34], contrariando a regra de nunca logar dado sensivel.
+- Timestamp fora de UTC: uso de `DateTime.Now` [src/ExamesAPI/Services/ResultadoService.cs:29], apesar de `ResultadoExame.LiberadoEm` documentar UTC [src/ExamesAPI/Domain/ResultadoExame.cs:15-16] e AGENTS exigir `DateTime.UtcNow`.
+- Risco adicional de exposicao via GET: `ResultadosController.Listar` retorna entidade completa (`ResultadoExame`) [src/ExamesAPI/Controllers/ResultadosController.cs:21-22]; no modelo atual ela nao traz `Nome/Cpf`, mas o endpoint nao aplica qualquer filtro/redacao para dados clinicos (`Valor`) [src/ExamesAPI/Domain/ResultadoExame.cs:10].
 
-2. Regra de liberacao esta permissiva demais.
-- Evidencia: `ResultadoService.LiberarResultado` nao valida `Valor` nem estado atual antes de setar `Status = Liberado` em `src/ExamesAPI/Services/ResultadoService.cs`.
-- Evidencia complementar: `StatusResultado` inclui estados que deveriam restringir transicao (`Liberado`, `Cancelado`) em `src/ExamesAPI/Domain/StatusResultado.cs`.
-- Risco: libera resultado sem valor e permite transicoes invalidas (ex.: de `Cancelado` para `Liberado` ou reliberacao).
-
-3. Timestamp de liberacao em hora local, divergente do contrato de dominio.
-- Evidencia: uso de `DateTime.Now` em `src/ExamesAPI/Services/ResultadoService.cs`.
-- Evidencia complementar: comentario de `LiberadoEm` exige UTC em `src/ExamesAPI/Domain/ResultadoExame.cs`.
-- Risco: inconsistencias temporais entre ambientes/timezones e auditoria.
-
-4. Dados seed ja induzem cenario critico de regra faltante.
-- Evidencia: seed cria `ResultadoExame` com `Valor = null` e `Status = Pendente` em `src/ExamesAPI/Infra/SeedData.cs`.
-- Risco: endpoint de liberacao consegue produzir estado invalido logo no cenario inicial da demo.
-
-5. Cobertura de testes de negocio inexistente para o servico principal.
-- Evidencia: `tests/ExamesAPI.Tests/UnitTest1.cs` contem apenas smoke test (`Assert.True(true)`).
-- Evidencia complementar: TODO explicito sobre falta de cobertura em `tests/ExamesAPI.Tests/UnitTest1.cs`.
-- Risco: regressao silenciosa em regra de negocio/compliance.
-
-6. Endpoint de cadastro de paciente sem validacao.
-- Evidencia: TODO em `src/ExamesAPI/Controllers/PacientesController.cs` indicando ausencia de validacao de CPF/nome; metodo adiciona entidade diretamente ao repositorio.
-- Risco: entrada de dados invalidos e aumento de superficie de problemas de qualidade/compliance.
-
-7. Deriva documental entre implementacao e docs funcionais.
-- Evidencia: `docs/resultados.md` marca explicitamente a documentacao como desatualizada e nao cita pre-condicoes de liberacao nem UTC.
-- Evidencia complementar: `README.md` lista os problemas plantados (liberacao sem valor/qualquer status, DateTime.Now, log com CPF/nome, falta de testes).
-- Risco: time operar com regra errada, onboarding e manutencao guiados por informacao incorreta.
+### Cobertura de testes
+- Nao existem testes unitarios da regra de liberacao em `ResultadoService`; ha apenas smoke test `Assert.True(true)` [tests/ExamesAPI.Tests/UnitTest1.cs:3-11].
+- Ausencia de testes de caminho feliz e de violacoes obrigatorias descritas no AGENTS (valor nulo, status invalido, re-liberacao, cancelado, UTC em `LiberadoEm`, higienizacao de log) [tests/ExamesAPI.Tests/UnitTest1.cs:3-11].
+- Embora o projeto de testes tenha dependencias xUnit/cobertura configuradas [tests/ExamesAPI.Tests/ExamesAPI.Tests.csproj:11-14], nao ha evidencia de cenarios cobrindo Controller/Service/Repositorio no fluxo de liberar resultado [tests/ExamesAPI.Tests/UnitTest1.cs:3-11].
