@@ -133,6 +133,100 @@ public class ResultadoServiceTests
         Assert.DoesNotContain("4.2", mensagem);
     }
 
+    [Fact]
+    public void CancelarResultado_QuandoPendente_DeveCancelar()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        var resultadoCancelado = service.CancelarResultado(resultado.Id);
+
+        // Assert
+        Assert.Equal(StatusResultado.Cancelado, resultadoCancelado.Status);
+        Assert.Null(resultadoCancelado.LiberadoEm);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoEmAnalise_DeveCancelar()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.EmAnalise, 4.2, logger, out var resultado);
+
+        // Act
+        var resultadoCancelado = service.CancelarResultado(resultado.Id);
+
+        // Assert
+        Assert.Equal(StatusResultado.Cancelado, resultadoCancelado.Status);
+        Assert.Null(resultadoCancelado.LiberadoEm);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoResultadoNaoExiste_DeveLancarResultadoNaoEncontradoException()
+    {
+        // Arrange
+        var repo = new RepositorioMemoria();
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = new ResultadoService(repo, logger);
+
+        // Act
+        Action acao = () => service.CancelarResultado(Guid.NewGuid());
+
+        // Assert
+        Assert.Throws<ResultadoNaoEncontradoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoStatusLiberado_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Liberado, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id);
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoStatusCancelado_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Cancelado, 4.2, logger, out var resultado);
+        var statusOriginal = resultado.Status;
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id);
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+        Assert.Equal(statusOriginal, resultado.Status);
+    }
+
+    [Fact]
+    public void CancelarResultado_LogNaoDeveConterNomeCpfOuValor()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        _ = service.CancelarResultado(resultado.Id);
+
+        // Assert
+        Assert.NotEmpty(logger.Messages);
+        var mensagem = logger.Messages.Single();
+        Assert.Contains(resultado.Id.ToString(), mensagem);
+        Assert.DoesNotContain("Maria", mensagem);
+        Assert.DoesNotContain("12345678900", mensagem);
+        Assert.DoesNotContain("4.2", mensagem);
+    }
+
     private static ResultadoService CriarServiceComResultado(
         StatusResultado status,
         double? valor,

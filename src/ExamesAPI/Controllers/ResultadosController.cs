@@ -38,4 +38,22 @@ public class ResultadosController : ControllerBase
             return UnprocessableEntity(new { erro = ex.Message });
         }
     }
+
+    [HttpPost("{id:guid}/cancelar")]
+    public ActionResult<ResultadoExame> Cancelar(Guid id)
+    {
+        try
+        {
+            var resultado = _service.CancelarResultado(id);
+            return Ok(resultado);
+        }
+        catch (ResultadoNaoEncontradoException ex)
+        {
+            return NotFound(new { erro = ex.Message });
+        }
+        catch (RegraCancelamentoException ex)
+        {
+            return UnprocessableEntity(new { erro = ex.Message });
+        }
+    }
 }

@@ -53,3 +53,14 @@ Leia PLAN.md e implemente exatamente o plano. Requisitos obrigatorios: refatorar
 Revise o diff como um Auditor de Segurança: sobrou alguma exposição de dado sensível de
 paciente (CPF, nome, valor clínico) em log, retorno de API ou mensagem de erro? Aponte com
 arquivo e linha.
+
+## Implement
+create a pull request to merge the branch demo-dasa to main
+
+## Implement
+adiciona um endpoint pra cancelar resultado -grill-me
+
+## Implement
+adiciona um endpoint pra cancelar resultado -grill-me
+## Implement
+adiciona um endpoint pra cancelar resultado $dev-grill-me

@@ -24,6 +24,15 @@ public class ResultadoService
         return resultado;
     }
 
+    public ResultadoExame CancelarResultado(Guid resultadoId)
+    {
+        var resultado = ObterResultadoOuFalhar(resultadoId);
+        ValidarElegibilidadeCancelamento(resultado);
+        Cancelar(resultado);
+        RegistrarAuditoriaCancelamento(resultado);
+        return resultado;
+    }
+
     private ResultadoExame ObterResultadoOuFalhar(Guid resultadoId)
     {
         var resultado = _repo.Resultados.FirstOrDefault(x => x.Id == resultadoId);
@@ -48,9 +57,26 @@ public class ResultadoService
         resultado.LiberadoEm = DateTime.UtcNow;
     }
 
+    private static void ValidarElegibilidadeCancelamento(ResultadoExame resultado)
+    {
+        if (resultado.Status is not StatusResultado.Pendente and not StatusResultado.EmAnalise)
+            throw new RegraCancelamentoException("Somente resultados pendentes ou em analise podem ser cancelados.");
+    }
+
+    private static void Cancelar(ResultadoExame resultado)
+    {
+        resultado.Status = StatusResultado.Cancelado;
+        resultado.LiberadoEm = null;
+    }
+
     private void RegistrarAuditoria(ResultadoExame resultado)
     {
         _logger.LogInformation("Resultado {ResultadoId} liberado.", resultado.Id);
+    }
+
+    private void RegistrarAuditoriaCancelamento(ResultadoExame resultado)
+    {
+        _logger.LogInformation("Resultado {ResultadoId} cancelado.", resultado.Id);
     }
 
     private void Notificar(ResultadoExame resultado)
