@@ -134,33 +134,21 @@ public class ResultadoServiceTests
     }
 
     [Fact]
-    public void CancelarResultado_QuandoPendente_DeveCancelar()
+    public void CancelarResultado_QuandoPendenteComMotivo_DeveCancelarComUtcEGuardarMotivo()
     {
         // Arrange
         var logger = new LoggerSpy<ResultadoService>();
         var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+        const string motivo = "Amostra comprometida";
 
         // Act
-        var resultadoCancelado = service.CancelarResultado(resultado.Id);
+        var resultadoCancelado = service.CancelarResultado(resultado.Id, motivo);
 
         // Assert
         Assert.Equal(StatusResultado.Cancelado, resultadoCancelado.Status);
-        Assert.Null(resultadoCancelado.LiberadoEm);
-    }
-
-    [Fact]
-    public void CancelarResultado_QuandoEmAnalise_DeveCancelar()
-    {
-        // Arrange
-        var logger = new LoggerSpy<ResultadoService>();
-        var service = CriarServiceComResultado(StatusResultado.EmAnalise, 4.2, logger, out var resultado);
-
-        // Act
-        var resultadoCancelado = service.CancelarResultado(resultado.Id);
-
-        // Assert
-        Assert.Equal(StatusResultado.Cancelado, resultadoCancelado.Status);
-        Assert.Null(resultadoCancelado.LiberadoEm);
+        Assert.NotNull(resultadoCancelado.CanceladoEm);
+        Assert.Equal(DateTimeKind.Utc, resultadoCancelado.CanceladoEm!.Value.Kind);
+        Assert.Equal(motivo, resultadoCancelado.MotivoCancelamento);
     }
 
     [Fact]
@@ -172,7 +160,7 @@ public class ResultadoServiceTests
         var service = new ResultadoService(repo, logger);
 
         // Act
-        Action acao = () => service.CancelarResultado(Guid.NewGuid());
+        Action acao = () => service.CancelarResultado(Guid.NewGuid(), "Amostra comprometida");
 
         // Assert
         Assert.Throws<ResultadoNaoEncontradoException>(acao);
@@ -186,7 +174,7 @@ public class ResultadoServiceTests
         var service = CriarServiceComResultado(StatusResultado.Liberado, 4.2, logger, out var resultado);
 
         // Act
-        Action acao = () => service.CancelarResultado(resultado.Id);
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
 
         // Assert
         Assert.Throws<RegraCancelamentoException>(acao);
@@ -198,25 +186,86 @@ public class ResultadoServiceTests
         // Arrange
         var logger = new LoggerSpy<ResultadoService>();
         var service = CriarServiceComResultado(StatusResultado.Cancelado, 4.2, logger, out var resultado);
-        var statusOriginal = resultado.Status;
 
         // Act
-        Action acao = () => service.CancelarResultado(resultado.Id);
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
 
         // Assert
         Assert.Throws<RegraCancelamentoException>(acao);
-        Assert.Equal(statusOriginal, resultado.Status);
     }
 
     [Fact]
-    public void CancelarResultado_LogNaoDeveConterNomeCpfOuValor()
+    public void CancelarResultado_QuandoMotivoNulo_DeveLancarRegraCancelamentoException()
     {
         // Arrange
         var logger = new LoggerSpy<ResultadoService>();
         var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
 
         // Act
-        _ = service.CancelarResultado(resultado.Id);
+        Action acao = () => service.CancelarResultado(resultado.Id, null);
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoMotivoEmBranco_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "   ");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoMotivoContemDadoSensivel_DeveLancarRegraCancelamentoException()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Paciente Maria CPF 12345678900");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+    }
+
+    [Fact]
+    public void CancelarResultado_QuandoViolacaoNaoDeveAlterarStatusNemCanceladoEmNemMotivo()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Liberado, 4.2, logger, out var resultado);
+        var statusOriginal = resultado.Status;
+        var canceladoEmOriginal = resultado.CanceladoEm;
+        var motivoOriginal = resultado.MotivoCancelamento;
+
+        // Act
+        Action acao = () => service.CancelarResultado(resultado.Id, "Amostra comprometida");
+
+        // Assert
+        Assert.Throws<RegraCancelamentoException>(acao);
+        Assert.Equal(statusOriginal, resultado.Status);
+        Assert.Equal(canceladoEmOriginal, resultado.CanceladoEm);
+        Assert.Equal(motivoOriginal, resultado.MotivoCancelamento);
+    }
+
+    [Fact]
+    public void CancelarResultado_LogNaoDeveConterNomeCpfValorOuMotivo()
+    {
+        // Arrange
+        var logger = new LoggerSpy<ResultadoService>();
+        var service = CriarServiceComResultado(StatusResultado.Pendente, 4.2, logger, out var resultado);
+        const string motivo = "Amostra comprometida";
+
+        // Act
+        _ = service.CancelarResultado(resultado.Id, motivo);
 
         // Assert
         Assert.NotEmpty(logger.Messages);
@@ -225,6 +274,7 @@ public class ResultadoServiceTests
         Assert.DoesNotContain("Maria", mensagem);
         Assert.DoesNotContain("12345678900", mensagem);
         Assert.DoesNotContain("4.2", mensagem);
+        Assert.DoesNotContain(motivo, mensagem);
     }
 
     private static ResultadoService CriarServiceComResultado(

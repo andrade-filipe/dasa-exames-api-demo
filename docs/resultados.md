@@ -18,7 +18,14 @@ Auditoria:
 - Nome, CPF e valor clinico nao sao registrados em log.
 
 ## Cancelamento
-Para cancelar um resultado, chame `POST /resultados/{id}/cancelar`.
+Para cancelar um resultado, chame `POST /resultados/{id}/cancelar` com body JSON contendo `motivo`.
+
+Exemplo de body:
+```json
+{
+  "motivo": "Amostra comprometida"
+}
+```
 
 O endpoint retorna:
 - `200 OK` quando o cancelamento ocorre com sucesso.
@@ -26,10 +33,11 @@ O endpoint retorna:
 - `422 UnprocessableEntity` quando a regra de cancelamento e violada.
 
 Regras de cancelamento aplicadas pelo servico:
+- `motivo` e obrigatorio e nao pode ser vazio.
 - Status atual deve ser `Pendente` ou `EmAnalise`.
-- Nao e permitido cancelar resultado `Liberado`.
-- Nao e permitido cancelar resultado ja `Cancelado`.
+- `Status` muda para `Cancelado`, `CanceladoEm` e preenchido com `DateTime.UtcNow`, e `MotivoCancelamento` armazena o motivo.
+- `motivo` nao pode conter dados sensiveis de paciente (nome, CPF, valor clinico).
 
 Auditoria:
 - Logs de cancelamento contem somente identificador tecnico (`ResultadoId`).
-- Nome, CPF e valor clinico nao sao registrados em log.
+- Nome, CPF, valor clinico e motivo nao sao registrados em log.

@@ -54,13 +54,35 @@ Revise o diff como um Auditor de Segurança: sobrou alguma exposição de dado s
 paciente (CPF, nome, valor clínico) em log, retorno de API ou mensagem de erro? Aponte com
 arquivo e linha.
 
-## Implement
-create a pull request to merge the branch demo-dasa to main
+## Implement — 6
 
-## Implement
-adiciona um endpoint pra cancelar resultado -grill-me
+Implemente o cancelamento de resultado, seguindo o AGENTS.md e o MESMO padrão do liberar:
 
-## Implement
-adiciona um endpoint pra cancelar resultado -grill-me
-## Implement
-adiciona um endpoint pra cancelar resultado $dev-grill-me
+- POST /resultados/{id:guid}/cancelar recebendo um motivo (string, obrigatório, não vazio)
+- regra: só cancela resultado em Pendente ou EmAnalise; não cancela Liberado nem recancela Cancelado
+- ao cancelar: Status = Cancelado, CanceladoEm em UTC, e guarda o Motivo
+- erros no mesmo padrão do liberar (exceção de domínio → NotFound / UnprocessableEntity)
+- Motivo e logs NUNCA podem conter dado de paciente (compliance)
+- testes xUnit (AAA) cobrindo caminho feliz e cada violação; sincronize docs/resultados.md
+  Me mostre o diff e rode dotnet test.
+
+$agnostic-code-quality $dotnet-xunit-testing $verify-and-doc
+
+## Review - 7
+
+Revise este diff com a skill adversarial-code-reviewer (personas hostis) e com a
+agnostic-code-quality. Aponte qualquer exposição de dado de paciente ou problema de
+qualidade, com arquivo e linha.
+
+$adversarial-code-reviewer $agnostic-code-quality
+
+## Implement — 8
+
+Faça um retro rápido desta tarefa (dev-self-improvement): alguma landmine ou convenção que
+deveria virar regra no AGENTS.md ou entrar no gotchas do time? Proponha o texto.
+
+$dev-self-improvement $curated-gotchas
+
+(depois)
+
+> Aprovado, prossiga com as modificações

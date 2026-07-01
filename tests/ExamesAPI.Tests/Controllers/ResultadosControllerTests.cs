@@ -67,15 +67,17 @@ public class ResultadosControllerTests
         var resultado = AdicionarResultado(repo, StatusResultado.Pendente, 10.5);
         var service = new ResultadoService(repo, NullLogger<ResultadoService>.Instance);
         var controller = new ResultadosController(repo, service);
+        var request = new ResultadosController.CancelarResultadoRequest { Motivo = "Amostra comprometida" };
 
         // Act
-        var resposta = controller.Cancelar(resultado.Id);
+        var resposta = controller.Cancelar(resultado.Id, request);
 
         // Assert
         var ok = Assert.IsType<OkObjectResult>(resposta.Result);
         var payload = Assert.IsType<ResultadoExame>(ok.Value);
         Assert.Equal(resultado.Id, payload.Id);
         Assert.Equal(StatusResultado.Cancelado, payload.Status);
+        Assert.Equal("Amostra comprometida", payload.MotivoCancelamento);
     }
 
     [Fact]
@@ -85,9 +87,10 @@ public class ResultadosControllerTests
         var repo = new RepositorioMemoria();
         var service = new ResultadoService(repo, NullLogger<ResultadoService>.Instance);
         var controller = new ResultadosController(repo, service);
+        var request = new ResultadosController.CancelarResultadoRequest { Motivo = "Amostra comprometida" };
 
         // Act
-        var resposta = controller.Cancelar(Guid.NewGuid());
+        var resposta = controller.Cancelar(Guid.NewGuid(), request);
 
         // Assert
         Assert.IsType<NotFoundObjectResult>(resposta.Result);
@@ -98,12 +101,13 @@ public class ResultadosControllerTests
     {
         // Arrange
         var repo = new RepositorioMemoria();
-        var resultado = AdicionarResultado(repo, StatusResultado.Liberado, 10.5);
+        var resultado = AdicionarResultado(repo, StatusResultado.Cancelado, 10.5);
         var service = new ResultadoService(repo, NullLogger<ResultadoService>.Instance);
         var controller = new ResultadosController(repo, service);
+        var request = new ResultadosController.CancelarResultadoRequest { Motivo = "Amostra comprometida" };
 
         // Act
-        var resposta = controller.Cancelar(resultado.Id);
+        var resposta = controller.Cancelar(resultado.Id, request);
 
         // Assert
         Assert.IsType<UnprocessableEntityObjectResult>(resposta.Result);
